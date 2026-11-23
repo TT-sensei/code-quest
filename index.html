@@ -69,6 +69,9 @@ main{max-width:1180px;margin:0 auto;padding:12px 14px}
 .rtag{display:inline-block;background:#EFF6FF;color:#1D4ED8;border:1.5px solid #BFDBFE;font-size:11px;font-weight:800;border-radius:999px;padding:2px 9px;margin:0 5px 5px 0}
 .rec-note{background:#FFFBEB;border:1.5px dashed #FCD34D;border-radius:10px;padding:7px 10px;font-size:12.5px;font-weight:700;margin-top:2px;white-space:pre-wrap}
 .rec-prog{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px;align-items:center}
+.tbox{display:inline-flex;flex-wrap:wrap;gap:3px;align-items:center;border:1.5px dashed #94A3B8;border-radius:9px;padding:3px 5px;margin:1px}
+.tbox.trep{border-color:#0D9488;background:#F0FDFA}.tbox.tif{border-color:#DB2777;background:#FDF2F8}
+.tlab{font-size:10px;font-weight:900;color:#475569}
 .rec-prog .pl{font-size:10.5px;font-weight:900;color:#64748B;margin-right:3px}
 .pmini{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;color:#fff;font-size:13px;font-weight:900}
 .rec-again{margin-top:8px;background:#2563EB;color:#fff;border:none;border-radius:10px;padding:7px 14px;font-weight:900;font-size:12px;cursor:pointer}
@@ -108,7 +111,7 @@ main{max-width:1180px;margin:0 auto;padding:12px 14px}
 .mcard .stat{margin-top:auto;font-size:11px;font-weight:900;color:#059669}
 .mcard .stat.yet{color:#94A3B8}
 /* ---------- プログラム画面 ---------- */
-.play-grid{display:grid;grid-template-columns:44% 21% 35%;gap:12px;height:calc(100vh - 118px);min-height:560px}
+.play-grid{display:grid;grid-template-columns:44fr 21fr 35fr;gap:12px;height:calc(100vh - 118px);min-height:560px}
 .panel{background:#fff;border:2px solid var(--line);border-radius:22px;display:flex;flex-direction:column;overflow:hidden}
 .panel-head{padding:10px 14px;border-bottom:2px solid #EFF6FF;background:#F8FBFF}
 .step-badge{font-size:10px;font-weight:900;background:var(--blue);color:#fff;border-radius:999px;padding:2px 9px}
@@ -551,6 +554,7 @@ function bgFor(m){if(m.bg)return m.bg;for(const k in BG_BY_STEP)if(m.step.indexO
 function enemyImgUrl(id){return "https://tt-sensei.github.io/navi-character-/assets/web/fantasy/monsters/zako/"+id+".webp"}
 function setMsg(t,mood){$("naviMsg").textContent=t;const b=$("naviBubble");b.className="navi-bubble"+(mood==="warn"?" warn":mood==="hint"?" hintbg":"")}
 /* ===== トップ画面 ===== */
+function esc(t){return String(t==null?"":t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
 function renderTop(){
  const pt=partner(),xp=curXp(),st=stageOf(xp);
  $("partnerArt").innerHTML='<img class="partner-img" src="'+partnerImg(pt.id,st)+'" alt="'+pt.names[st-1]+'">';
@@ -592,10 +596,11 @@ function buildPalette(){
   btn.addEventListener("click",()=>addBlock(b.type));p.appendChild(btn)});
  const note=document.createElement("p");note.className="pal-note";note.textContent=freeMode?"すべての ブロックが つかえるよ。「くりかえし」「もし」を えらんでから ブロックを おすと、なかに 入るよ。":(cur>=46?"「くりかえし」「もし」を えらんでから ブロックを おすと、なかに 入るよ。":(cur>=36?"「くりかえし」を えらんでから ブロックを おすと、なかに 入るよ。ならびかえは ↑↓、けすときは ×。":"プログラムは 上から じゅんばんに うごくよ。ならびかえは ↑↓、けすときは × を つかってね。"));p.appendChild(note);
 }
+function setGuideFace(){$("guideFace").innerHTML='<svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="17" fill="'+guide.color+'"/><circle cx="14" cy="18" r="2.4" fill="#0F172A"/><circle cx="26" cy="18" r="2.4" fill="#0F172A"/><path d="M14 25 Q20 29 26 25" stroke="#0F172A" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>'}
 function openMission(id){
  cur=id;program=(mission().preset||[]).map(t=>({id:nid(),type:t}));selId=null;hintIdx=0;buildPalette();guide=GUIDES[Math.floor(Math.random()*GUIDES.length)];
  $("guideName").textContent="ガイド："+guide.name;
- $("guideFace").innerHTML='<svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="17" fill="'+guide.color+'"/><circle cx="14" cy="18" r="2.4" fill="#0F172A"/><circle cx="26" cy="18" r="2.4" fill="#0F172A"/><path d="M14 25 Q20 29 26 25" stroke="#0F172A" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>';
+ setGuideFace();
  const m=mission();$("mStep").textContent=m.step+"｜"+gradeOf(m.id)+(m.subject?"｜教科："+m.subject:"");$("mTitle").textContent="ミッション "+m.id+"："+m.title;$("mGoal").textContent=m.desc;
  $("hintNo").textContent="1/"+m.hints.length;
  freeMode=false;freeMission=null;$("btnBackTop").textContent="← ミッションいちらん";$("screenTop").classList.add("hidden");$("screenRecords").classList.add("hidden");$("screenEditor").classList.add("hidden");$("screenTeacher").classList.add("hidden");$("screenPlay").classList.remove("hidden");$("btnBackTop").classList.remove("hidden");$("btnRecords").classList.add("hidden");$("btnFree").classList.add("hidden");$("btnTeacher").classList.add("hidden");
@@ -620,7 +625,8 @@ function renderRecords(){
   if((r.chips||[]).length)h+=r.chips.map(c=>'<span class="rtag">✓ '+c+"</span>").join("");
   else h+='<span class="rtag" style="background:#F8FAFC;color:#94A3B8;border-color:#E2E8F0">ふりかえりは まだ かいて いない</span>';
   if(r.note)h+='<div class="rec-note">✏️ '+r.note.replace(/</g,"&lt;")+"</div>";
-  if(prog.length)h+='<div class="rec-prog"><span class="pl">つかった プログラム（'+prog.length+'こ）</span>'+prog.map(t=>'<span class="pmini '+META[t].cls+'" title="'+META[t].label+'">'+META[t].icon+"</span>").join("")+"</div>";
+  if(prog.length){const isTree=typeof prog[0]==="object";
+   h+='<div class="rec-prog"><span class="pl">つかった プログラム（'+(isTree?countTree(prog):prog.length)+'こ）</span>'+(isTree?miniTree(prog):prog.map(t=>'<span class="pmini '+META[t].cls+'" title="'+META[t].label+'">'+META[t].icon+"</span>").join(""))+"</div>"}
   h+='<br><button class="rec-again" type="button">▶ もういちど あそぶ</button>';
   card.innerHTML=h;
   card.querySelector(".rec-again").addEventListener("click",()=>{Snd.tap();$("screenRecords").classList.add("hidden");$("btnRecords").classList.remove("hidden");openMission(m.id)});
@@ -651,7 +657,7 @@ function renderObjects(){
  const add=(x,y,cls,txt)=>{const d=document.createElement("div");d.className="obj";d.setAttribute("style",cellPos(x,y,n));d.innerHTML='<div class="inner '+cls+'">'+txt+"</div>";o.appendChild(d)};
  add(m.start.x,m.start.y,"start-inner","START");
  m.rocks.forEach(r=>add(r.x,r.y,"rock-inner","🪨"));
- missionEnemies(m).forEach(e=>{if(!defeated.includes(e.x+","+e.y)){const d=document.createElement("div");d.className="obj";d.setAttribute("style",cellPos(e.x,e.y,n));d.innerHTML='<div class="inner enemy-inner"><img class="enemy-img" src="'+enemyImgUrl(e.img)+'" alt="'+e.name+'"><div class="enemy-name">'+e.name+"</div></div>";o.appendChild(d)}});
+ missionEnemies(m).forEach(e=>{if(!defeated.includes(e.x+","+e.y)){const d=document.createElement("div");d.className="obj";d.setAttribute("style",cellPos(e.x,e.y,n));d.innerHTML='<div class="inner enemy-inner"><img class="enemy-img" src="'+enemyImgUrl(e.img)+'" alt="'+esc(e.name)+'"><div class="enemy-name">'+e.name+"</div></div>";o.appendChild(d)}});
  $("enemyNow").textContent=defeated.length;$("enemyAll").textContent=missionEnemies(m).length;
  m.stars.forEach(s=>{if(!collected.includes(s.x+","+s.y))add(s.x,s.y,"star-inner","⭐")});
  if(m.stars.length){$("starBadge").classList.remove("hidden");$("starNow").textContent=collected.length;$("starAll").textContent=m.stars.length}else{$("starBadge").classList.add("hidden")}
@@ -659,9 +665,11 @@ function renderObjects(){
 const DIR_TXT=["↑ きた","→ ひがし","↓ みなみ","← にし"];
 function updateRobot(){$("robot").style.transform="translate("+(robot.x*100)+"%, "+(robot.y*100)+"%)";const da=$("dirArrow");if(da)da.style.transform="rotate("+robot.angle+"deg)";const dn=$("dirNow");if(dn)dn.textContent=DIR_TXT[robot.dir]}
 /* ===== プログラム編集（タップのみ） ===== */
-function findLoc(blocks,id){for(let i=0;i<blocks.length;i++){const b=blocks[i];if(b.id===id)return{list:blocks,index:i,block:b};if(b.type==="repeat"){const r=findLoc(b.children,id);if(r)return r}}return null}
+function findLoc(blocks,id){for(let i=0;i<blocks.length;i++){const b=blocks[i];if(b.id===id)return{list:blocks,index:i,block:b};if(b.children){const r=findLoc(b.children,id);if(r)return r}}return null}
 function expandBlocks(blocks,out){out=out||[];blocks.forEach(b=>{if(b.type==="repeat"){for(let i=0;i<(b.count||2);i++)expandBlocks(b.children,out)}else if(b.type==="ifwall"){expandBlocks(b.children,out)}else out.push({id:b.id,type:b.type})});return out}
-function addBlock(type){if(exec.status==="running")return;Snd.tap();const nb=type==="repeat"?{id:nid(),type,count:2,children:[]}:((type==="ifwall")?{id:nid(),type,children:[]}:{id:nid(),type});
+function editLocked(){return exec.status==="running"||exec.status==="paused"}
+function guardEdit(){if(editLocked()){setMsg("うごいている あいだは へんしゅうできないよ。へんしゅうしたいときは「↺ さいしょから」を おしてね。","warn");return true}return false}
+function addBlock(type){if(guardEdit())return;Snd.tap();const nb=type==="repeat"?{id:nid(),type,count:2,children:[]}:((type==="ifwall")?{id:nid(),type,children:[]}:{id:nid(),type});
  const loc=selId?findLoc(program,selId):null;
  if(loc&&(loc.block.type==="repeat"||loc.block.type==="ifwall"))loc.block.children.push(nb);
  else if(loc)loc.list.splice(loc.index+1,0,nb);
@@ -682,10 +690,10 @@ function renderList(blocks,parent){
   row.innerHTML=left+'<span class="ops"><button data-a="up" title="うえへ">↑</button><button data-a="down" title="したへ">↓</button><button data-a="del" title="けす">×</button></span>';
   row.querySelector('[data-a="up"]').addEventListener("click",()=>moveIn(blocks,i,-1));
   row.querySelector('[data-a="down"]').addEventListener("click",()=>moveIn(blocks,i,1));
-  row.querySelector('[data-a="del"]').addEventListener("click",()=>{if(exec.status==="running")return;Snd.del();if(selId===b.id)selId=null;blocks.splice(i,1);renderProgram()});
+  row.querySelector('[data-a="del"]').addEventListener("click",()=>{if(guardEdit())return;Snd.del();if(selId===b.id)selId=null;blocks.splice(i,1);renderProgram()});
   if(b.type==="repeat"){
-   row.querySelector('[data-a="minus"]').addEventListener("click",()=>{if(exec.status==="running")return;if(b.count>1){b.count--;Snd.tap();renderProgram()}});
-   row.querySelector('[data-a="plus"]').addEventListener("click",()=>{if(exec.status==="running")return;if(b.count<9){b.count++;Snd.tap();renderProgram()}});
+   row.querySelector('[data-a="minus"]').addEventListener("click",()=>{if(guardEdit())return;if(b.count>1){b.count--;Snd.tap();renderProgram()}});
+   row.querySelector('[data-a="plus"]').addEventListener("click",()=>{if(guardEdit())return;if(b.count<9){b.count++;Snd.tap();renderProgram()}});
   }
   row.addEventListener("click",e=>{if(e.target.closest(".ops")||e.target.closest(".cnt"))return;selId=b.id;renderProgram()});
   parent.appendChild(row);
@@ -695,7 +703,7 @@ function renderList(blocks,parent){
    parent.appendChild(wrap)}
  });
 }
-function moveIn(list,i,d){if(exec.status==="running")return;const j=i+d;if(j<0||j>=list.length)return;Snd.tap();const t=list[i];list[i]=list[j];list[j]=t;renderProgram()}
+function moveIn(list,i,d){if(guardEdit())return;const j=i+d;if(j<0||j>=list.length)return;Snd.tap();const t=list[i];list[i]=list[j];list[j]=t;renderProgram()}
 /* ===== 実行エンジン（ASTを1命令ずつ解釈・eval不使用） ===== */
 function stopTimer(){if(exec.timer){clearTimeout(exec.timer);exec.timer=null}}
 function updateRunBtn(){const b=$("btnRun");
@@ -750,8 +758,11 @@ function onClear(){
  const clearedBefore=save.cleared.length;
  if(first)save.cleared.push(m.id);
  const newlyUnlocked=first?PARTNERS.filter(x=>(x.unlock||0)>clearedBefore&&(x.unlock||0)<=save.cleared.length):[];
- const gain=first?20:5,pt=partner(),before=stageOf(curXp());save.xpBy[pt.id]=curXp()+gain;const after=stageOf(curXp());save.programs[cur]=expandBlocks(program).map(x=>x.type);persist();
- $("clearStats").textContent=m.title+"｜つかった めいれい "+expandBlocks(program).length+"こ｜+"+gain+" XP ゲット！";
+ const gain=first?20:5,pt=partner(),before=stageOf(curXp());save.xpBy[pt.id]=curXp()+gain;const after=stageOf(curXp());save.programs[cur]=serTree(program);persist();
+ let statsTxt=m.title+"｜つかった めいれい "+expandBlocks(program).length+"こ｜+"+gain+" XP ゲット！";
+ if(m.preset&&m.preset.length){const before=m.preset.length,after=expandBlocks(program).length;
+  statsTxt+=after<before?"｜🎉 さいしょの "+before+"こ を "+after+"こ に 短くできた！":"｜さいしょの プログラムは "+before+"こ。短く できるか ちょうせん してみよう"}
+ $("clearStats").textContent=statsTxt;
  const evo=$("evoAnnounce");
  let announce="";
  if(after>before)announce="✨ しんか！ パートナーが「"+pt.names[after-1]+"」に そだったよ！<br><img src=\""+partnerImg(pt.id,after)+"\" alt=\""+pt.names[after-1]+"\" style=\"width:76px;height:76px;object-fit:contain\">";
@@ -761,9 +772,15 @@ function onClear(){
  setMsg("やったね！てきを ぜんぶ たおした！");
  setTimeout(()=>$("clearModal").classList.remove("hidden"),500);
 }
+function serTree(nodes){return nodes.map(n=>{const o={t:n.type};if(n.type==="repeat"){o.c=n.count||2;o.k=serTree(n.children||[])}else if(n.type==="ifwall"){o.k=serTree(n.children||[])}return o})}
+function countTree(nodes){let c=0;nodes.forEach(n=>{const t=n.t||n.type;if(t==="repeat")c+=(n.c||n.count||2)*countTree(n.k||n.children||[]);else if(t==="ifwall")c+=countTree(n.k||n.children||[]);else c++});return c}
+function miniTree(nodes){return nodes.map(n=>{const t=n.t||n.type;
+ if(t==="repeat")return '<span class="tbox trep"><span class="tlab">🔁 くりかえし '+(n.c||n.count||2)+'かい</span>'+miniTree(n.k||n.children||[])+"</span>";
+ if(t==="ifwall")return '<span class="tbox tif"><span class="tlab">❓ もし</span>'+miniTree(n.k||n.children||[])+"</span>";
+ return '<span class="pmini '+META[t].cls+'" title="'+META[t].label+'">'+META[t].icon+"</span>"}).join("")}
 /* ===== 振り返り ===== */
 const CHIP_LABELS=["じゅんばんを くふうした","まちがいを なおせた","うごきを そうぞうできた","あきらめずに ちょうせんした"];
-function buildChips(){const prev=(save.reflections[cur]&&save.reflections[cur].chips)||[];const c=$("chips");c.innerHTML="";
+function buildChips(prevOverride){const prev=prevOverride||(save.reflections[cur]&&save.reflections[cur].chips)||[];const c=$("chips");c.innerHTML="";
  CHIP_LABELS.forEach(lb=>{const b=document.createElement("button");b.type="button";b.className="chip"+(prev.includes(lb)?" on":"");b.textContent=(prev.includes(lb)?"✓ ":"")+lb;
   b.addEventListener("click",()=>{Snd.tap();b.classList.toggle("on");b.textContent=(b.classList.contains("on")?"✓ ":"")+lb});c.appendChild(b)})}
 function saveReflection(){const chips=[];document.querySelectorAll("#chips .chip.on").forEach(el=>chips.push(el.textContent.replace("✓ ","")));
@@ -793,7 +810,7 @@ function renderEditor(){
  add(ed.start.x,ed.start.y,'<div class="inner" style="background:rgba(219,234,254,.85);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center"><img src="'+partnerImg(pt.id,pst)+'" style="width:72%;height:62%;object-fit:contain" alt="スタート"><div style="font-size:9px;font-weight:900;color:#1D4ED8">'+["⬆","➡","⬇","⬅"][ed.start.dir]+' スタート</div></div>');
  ed.rocks.forEach(r=>add(r.x,r.y,'<div class="inner rock-inner">🪨</div>'));
  ed.stars.forEach(st=>add(st.x,st.y,'<div class="inner star-inner">⭐</div>'));
- ed.enemies.forEach(e=>add(e.x,e.y,'<div class="inner enemy-inner"><img class="enemy-img" src="'+enemyImgUrl(e.img)+'" alt="'+e.name+'"><div class="enemy-name">'+e.name+"</div></div>"));
+ ed.enemies.forEach(e=>add(e.x,e.y,'<div class="inner enemy-inner"><img class="enemy-img" src="'+enemyImgUrl(e.img)+'" alt="'+esc(e.name)+'"><div class="enemy-name">'+e.name+"</div></div>"));
 }
 function edTap(x,y){Snd.tap();
  if(ed.tool==="start"){edClearCell(x,y);ed.start={x,y,dir:ed.start.dir}}
@@ -813,14 +830,19 @@ function openFreePlay(){
  $("screenEditor").classList.add("hidden");$("screenTop").classList.add("hidden");$("screenRecords").classList.add("hidden");$("screenTeacher").classList.add("hidden");$("screenPlay").classList.remove("hidden");
  $("btnBackTop").classList.remove("hidden");$("btnBackTop").textContent="← つくる画面";$("btnRecords").classList.add("hidden");$("btnFree").classList.add("hidden");
  const m=mission();$("mStep").textContent="じゆう制作";$("mTitle").textContent="🎨 "+m.title;$("mGoal").textContent=m.desc;
- guide=GUIDES[Math.floor(Math.random()*GUIDES.length)];$("guideName").textContent="ガイド："+guide.name;$("guideFace").textContent=guide.face;
+ guide=GUIDES[Math.floor(Math.random()*GUIDES.length)];$("guideName").textContent="ガイド："+guide.name;setGuideFace();
  resetStage();renderProgram();setMsg("プログラムを つくって、てきを ぜんぶ たおそう！")}
 function freeClear(){
  $("clearStats").textContent="「"+freeMission.title+"」クリア！｜つかった めいれい "+expandBlocks(program).length+"こ";
  $("evoAnnounce").classList.add("hidden");
- buildChips();$("reflNote").value="";
+ buildChips(currentWork&&currentWork.reflection?currentWork.reflection.chips:null);$("reflNote").value=(currentWork&&currentWork.reflection&&currentWork.reflection.note)||"";
  setMsg("やったね！てきを ぜんぶ たおした！");
  setTimeout(()=>$("clearModal").classList.remove("hidden"),500)}
+function saveFreeReflection(){const chips=[];document.querySelectorAll("#chips .chip.on").forEach(el=>chips.push(el.textContent.replace("✓ ","")));
+ const refl={chips,note:$("reflNote").value.trim()};
+ if(currentWork)currentWork.reflection=refl;
+ const wk=save.works.find(w=>freeMission&&w.name===freeMission.title);if(wk)wk.reflection=refl;
+ persist()}
 function renderWorks(){
  const w=$("workList");w.innerHTML="";
  if(!save.works.length){w.innerHTML='<p style="font-size:12px;font-weight:800;color:#94A3B8">まだ さくひんが ないよ。「💾 さくひんを ほぞん」で のこせるよ。</p>';return}
@@ -833,14 +855,14 @@ function renderWorks(){
   const bDel=document.createElement("button");bDel.type="button";bDel.className="sub";bDel.textContent="けす";
   bDel.addEventListener("click",()=>{if(bDel.dataset.arm){save.works.splice(i,1);persist();renderWorks()}else{bDel.dataset.arm="1";bDel.textContent="ほんとうに けす？";setTimeout(()=>{delete bDel.dataset.arm;bDel.textContent="けす"},2500)}});
   row.appendChild(bPlay);row.appendChild(bEdit);row.appendChild(bDel);w.appendChild(row)})}
-function loadWork(wk){ed={size:wk.size,bg:wk.bg,start:{...wk.start},rocks:wk.rocks.map(o=>({...o})),stars:wk.stars.map(o=>({...o})),enemies:wk.enemies.map(o=>({...o})),tool:"enemy"};$("edName").value=wk.name;currentWork={program:wk.program||[],layout:null}}
+function loadWork(wk){ed={size:wk.size,bg:wk.bg,start:{...wk.start},rocks:wk.rocks.map(o=>({...o})),stars:wk.stars.map(o=>({...o})),enemies:wk.enemies.map(o=>({...o})),tool:"enemy"};$("edName").value=wk.name;currentWork={program:wk.program||[],reflection:wk.reflection||null,layout:null}}
 $("btnEdDir").addEventListener("click",()=>{Snd.tap();ed.start.dir=(ed.start.dir+1)%4;renderEditor()});
 $("btnEdTop").addEventListener("click",()=>{Snd.tap();goTop()});
 $("btnEdPlay").addEventListener("click",()=>{Snd.tap();openFreePlay()});
 $("btnEdSave").addEventListener("click",()=>{Snd.tap();
  if(!ed.enemies.length){$("edMsg").textContent="てきを 1体以上 おいてから ほぞんしてね";return}
  const name=($("edName").value||"").trim()||("さくひん "+(save.works.length+1));
- const wk={name,size:ed.size,bg:ed.bg,start:{...ed.start},rocks:ed.rocks.map(o=>({...o})),stars:ed.stars.map(o=>({...o})),enemies:ed.enemies.map(o=>({...o})),program:(currentWork&&currentWork.program)||[]};
+ const wk={name,size:ed.size,bg:ed.bg,start:{...ed.start},rocks:ed.rocks.map(o=>({...o})),stars:ed.stars.map(o=>({...o})),enemies:ed.enemies.map(o=>({...o})),program:(currentWork&&currentWork.program)||[],reflection:(currentWork&&currentWork.reflection)||null};
  const ix=save.works.findIndex(w=>w.name===name);
  if(ix>=0)save.works[ix]=wk;else{if(save.works.length>=12){$("edMsg").textContent="さくひんは 12こまでだよ";return}save.works.push(wk)}
  persist();renderWorks();$("edMsg").textContent="「"+name+"」を ほぞんしたよ"});
@@ -852,12 +874,12 @@ $("btnSound").addEventListener("click",()=>{Snd.on=!Snd.on;save.sound=Snd.on;per
 $("btnRun").addEventListener("click",runOrPause);
 $("btnReset").addEventListener("click",()=>{Snd.tap();const keep=program.slice();resetStage();program=keep;renderProgram()});
 $("btnSpeed").addEventListener("click",()=>{Snd.tap();fast=!fast;$("btnSpeed").textContent=fast?"🐇 はやい":"🐢 ふつう"});
-$("btnClear").addEventListener("click",()=>{if(!program.length||exec.status==="running")return;$("clearBar").classList.remove("hidden")});
+$("btnClear").addEventListener("click",()=>{if(!program.length||guardEdit())return;$("clearBar").classList.remove("hidden")});
 $("clearNo").addEventListener("click",()=>$("clearBar").classList.add("hidden"));
-$("clearYes").addEventListener("click",()=>{Snd.del();const m=mission();program=m.preset?m.preset.map(t=>({id:nid(),type:t})):[];$("clearBar").classList.add("hidden");renderProgram()});
+$("clearYes").addEventListener("click",()=>{if(guardEdit()){$("clearBar").classList.add("hidden");return}Snd.del();const m=mission();program=m.preset?m.preset.map(t=>({id:nid(),type:t})):[];$("clearBar").classList.add("hidden");renderProgram()});
 $("btnHint").addEventListener("click",()=>{Snd.tap();const m=mission();setMsg("💡 ヒント："+m.hints[hintIdx%m.hints.length],"hint");hintIdx++;$("hintNo").textContent=((hintIdx%m.hints.length)+1)+"/"+m.hints.length});
-$("btnRetry").addEventListener("click",()=>{Snd.tap();if(!freeMode)saveReflection();$("clearModal").classList.add("hidden");const keep=program.slice();resetStage();program=keep;renderProgram()});
-$("btnNext").addEventListener("click",()=>{Snd.tap();if(freeMode){$("clearModal").classList.add("hidden");if(currentWork)currentWork.program=program;openEditor();return}saveReflection();$("clearModal").classList.add("hidden");if(cur<MISSIONS.length)openMission(cur+1);else goTop()});
+$("btnRetry").addEventListener("click",()=>{Snd.tap();if(freeMode)saveFreeReflection();else saveReflection();$("clearModal").classList.add("hidden");const keep=program.slice();resetStage();program=keep;renderProgram()});
+$("btnNext").addEventListener("click",()=>{Snd.tap();if(freeMode){saveFreeReflection();$("clearModal").classList.add("hidden");if(currentWork)currentWork.program=program;openEditor();return}saveReflection();$("clearModal").classList.add("hidden");if(cur<MISSIONS.length)openMission(cur+1);else goTop()});
 window.addEventListener("resize",()=>{if(!$("screenPlay").classList.contains("hidden"))renderField()});
 
 /* ===== 先生用・リンク・作品JSON ===== */
@@ -871,6 +893,9 @@ $("btnTeachTop").addEventListener("click",()=>{Snd.tap();goTop()});
 $("btnPrint").addEventListener("click",()=>window.print());
 $("btnLink").addEventListener("click",()=>{const url=location.origin+location.pathname+(freeMode?"#free":"#m="+cur);
  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(()=>setMsg("🔗 リンクを コピーしたよ。このミッションから すぐに はじめられるよ。")).catch(()=>setMsg("🔗 リンク："+url))}else setMsg("🔗 リンク："+url)});
+function cleanCells(arr,size,max){return (Array.isArray(arr)?arr:[]).filter(o=>o&&Number.isFinite(+o.x)&&Number.isFinite(+o.y)).slice(0,max).map(o=>({x:Math.max(0,Math.min(size-1,Math.round(+o.x))),y:Math.max(0,Math.min(size-1,Math.round(+o.y)))}))}
+function cleanEnemies(arr,size){return (Array.isArray(arr)?arr:[]).filter(o=>o&&Number.isFinite(+o.x)&&Number.isFinite(+o.y)).slice(0,6).map(o=>({x:Math.max(0,Math.min(size-1,Math.round(+o.x))),y:Math.max(0,Math.min(size-1,Math.round(+o.y))),img:/^[a-z0-9-]{3,60}$/.test(String(o.img||""))?String(o.img):"star-bat",name:String(o.name||"てき").replace(/[<>&"']/g,"").slice(0,20)||"てき"}))}
+function cleanProg(nodes,depth){if(!Array.isArray(nodes)||depth>4)return[];const TYPES=["forward","back","left","right","repeat","ifwall"];return nodes.slice(0,60).filter(n=>n&&TYPES.includes(n.type||n.t)).map(n=>{const t=n.type||n.t;const o={type:t};if(t==="repeat"){o.count=Math.max(1,Math.min(9,+n.count||+n.c||2));o.children=cleanProg(n.children||n.k,depth+1)}else if(t==="ifwall"){o.children=cleanProg(n.children||n.k,depth+1)}return o})}
 $("btnEdExport").addEventListener("click",()=>{Snd.tap();
  if(!save.works.length){$("edMsg").textContent="ほぞんした さくひんが ないよ";return}
  const blob=new Blob([JSON.stringify(save.works,null,1)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="code-quest-works.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);$("edMsg").textContent="さくひんを ファイルに 書き出したよ"});
@@ -880,7 +905,7 @@ $("workFile").addEventListener("change",e=>{const f=e.target.files[0];if(!f)retu
   arr.forEach(w=>{if(!w||typeof w.name!=="string"||![5,6,7,8].includes(w.size)||!Array.isArray(w.enemies)||!w.enemies.length)return;
    if(save.works.length>=12)return;
    let nm=w.name.slice(0,20)||"さくひん";let base=nm,k=2;while(save.works.some(x=>x.name===nm)){nm=base+" "+(k++)}
-   save.works.push({name:nm,size:w.size,bg:ED_BGS.some(b=>b[0]===w.bg)?w.bg:"grassland",start:{x:+w.start.x||0,y:+w.start.y||0,dir:[0,1,2,3].includes(w.start.dir)?w.start.dir:1},rocks:Array.isArray(w.rocks)?w.rocks:[],stars:Array.isArray(w.stars)?w.stars:[],enemies:w.enemies,program:Array.isArray(w.program)?w.program:[]});added++});
+   save.works.push({name:nm.replace(/[<>&"']/g,"").slice(0,20)||"さくひん",size:w.size,bg:ED_BGS.some(b=>b[0]===w.bg)?w.bg:"grassland",start:{x:Math.max(0,Math.min(w.size-1,Math.round(+((w.start||{}).x)||0))),y:Math.max(0,Math.min(w.size-1,Math.round(+((w.start||{}).y)||0))),dir:[0,1,2,3].includes((w.start||{}).dir)?w.start.dir:1},rocks:cleanCells(w.rocks,w.size,200),stars:cleanCells(w.stars,w.size,8),enemies:cleanEnemies(w.enemies,w.size),program:cleanProg(w.program,0),reflection:(w.reflection&&Array.isArray(w.reflection.chips))?{chips:w.reflection.chips.filter(c=>typeof c==="string").slice(0,4),note:String(w.reflection.note||"").slice(0,200)}:null});added++});
   persist();renderWorks();$("edMsg").textContent=added?added+" 件の さくひんを 読み込んだよ":"読み込める さくひんが なかったよ";
  }catch(err){$("edMsg").textContent="ファイルが 読み込めなかったよ"}};
  r.readAsText(f);e.target.value=""});

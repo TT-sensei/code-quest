@@ -88,7 +88,15 @@ main{max-width:1180px;margin:0 auto;padding:12px 14px}
 .field-wrap{flex:1;display:flex;align-items:center;justify-content:center;background:#F8FAFC;padding:10px;min-height:0}
 .gridbox{position:relative;background:#fff;border:2px solid #CBD5E1;border-radius:18px;padding:8px;box-shadow:inset 0 2px 8px rgba(15,23,42,.05)}
 .cells{display:grid;gap:5px;width:100%;height:100%}
-.cell{border-radius:10px;border:1px solid #E2E8F0;background:#fff}
+.cell{border-radius:10px;border:1px solid rgba(226,232,240,.75);background:rgba(255,255,255,.5)}
+.cell.alt{background:rgba(255,255,255,.3)}
+.gridbox{background-size:cover;background-position:center;background-color:#DBEAFE}
+.enemy-inner{background:rgba(255,255,255,.25);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.enemy-img{width:86%;height:74%;object-fit:contain;filter:drop-shadow(0 3px 3px rgba(0,0,0,.4));animation:ebob 1.6s ease-in-out infinite}
+@keyframes ebob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.enemy-name{font-size:8.5px;font-weight:900;color:#7F1D1D;background:rgba(255,255,255,.85);border-radius:999px;padding:0 5px;line-height:1.5;white-space:nowrap;max-width:100%;overflow:hidden}
+.defeat-fx{position:absolute;font-size:32px;z-index:6;pointer-events:none;animation:dfx .7s ease-out forwards;display:flex;align-items:center;justify-content:center}
+@keyframes dfx{0%{transform:scale(.5) rotate(-10deg);opacity:1}100%{transform:scale(1.7) translateY(-16px) rotate(12deg);opacity:0}}
 .cell.alt{background:#F1F5F9}
 .obj{position:absolute;display:flex;align-items:center;justify-content:center;pointer-events:none}
 .obj .inner{width:88%;height:88%;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900}
@@ -124,7 +132,7 @@ main{max-width:1180px;margin:0 auto;padding:12px 14px}
 .pbtn .ic{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:900;flex-shrink:0}
 .pbtn .lb{font-size:14.5px;font-weight:900;line-height:1.25}
 .pbtn .ds{font-size:10px;font-weight:700;opacity:.85}
-.b-forward{background:#2563EB}.b-back{background:#4F46E5}.b-right{background:#EA580C}.b-left{background:#7C3AED}.b-repeat{background:#0D9488}
+.b-forward{background:#2563EB}.b-back{background:#4F46E5}.b-right{background:#EA580C}.b-left{background:#7C3AED}.b-repeat{background:#0D9488}.b-if{background:#DB2777}
 .prog-head{padding:10px 14px;border-bottom:2px solid #EFF6FF;background:#F8FBFF;display:flex;justify-content:space-between;align-items:center}
 .prog-head b{font-size:14px}
 .count-badge{background:#DBEAFE;color:#1D4ED8;font-size:11px;font-weight:900;border-radius:999px;padding:2px 9px;margin-left:6px}
@@ -139,6 +147,7 @@ main{max-width:1180px;margin:0 auto;padding:12px 14px}
 .blk .ops{display:flex;gap:4px}
 .blk .ops button{width:29px;height:29px;border:none;border-radius:9px;background:rgba(255,255,255,.22);color:#fff;font-weight:900;font-size:13px}
 .rep-wrap{margin:0 0 6px 14px;border-left:4px solid #99F6E4;padding-left:8px}
+.rep-wrap.ifw{border-left-color:#F9A8D4}
 .rep-empty{font-size:11px;font-weight:800;color:#94A3B8;border:1.5px dashed #CBD5E1;border-radius:10px;padding:6px 9px;margin-bottom:6px;cursor:pointer}
 .blk .cnt{display:inline-flex;align-items:center;gap:3px;margin-left:6px}
 .blk .cnt button{width:24px;height:24px;border-radius:8px;border:none;background:rgba(255,255,255,.35);color:#fff;font-weight:900;cursor:pointer;font-size:14px;line-height:1}
@@ -219,6 +228,7 @@ main{max-width:1180px;margin:0 auto;padding:12px 14px}
       <div class="panel-head">
         <span class="step-badge" id="mStep">STEP 1</span>
         <span class="star-badge hidden" id="starBadge">★ <span id="starNow">0</span>/<span id="starAll">0</span></span>
+        <span class="star-badge" id="enemyBadge" style="background:#FCE7F3;color:#9D174D">⚔️ てき <span id="enemyNow">0</span>/<span id="enemyAll">0</span></span>
         <span class="star-badge" id="dirBadge">むき <span id="dirNow">→ ひがし</span></span>
         <div class="mtitle" id="mTitle">ミッション 1</div>
         <p class="mgoal" id="mGoal"></p>
@@ -304,58 +314,71 @@ main{max-width:1180px;margin:0 auto;padding:12px 14px}
 "use strict";
 /* ===== ミッション定義（Phase 1：順次処理 35問） dir:0=北 1=東 2=南 3=西。全問BFSで到達可能性を検証済み ===== */
 const MISSIONS=[
-{id:1,step:"STEP 1：めいれいを しる",title:"まっすぐ すすもう",desc:"「すすむ」を 3つ ならべて、ゴールまで すすもう。",size:5,start:{x:0,y:2,dir:1},goal:{x:3,y:2},rocks:[],stars:[],preset:null,hints:["ロボットは みぎを むいているよ。そのまま すすめるね！","ゴールまで なんマスか、ゆびで かぞえてみよう。","「まえに すすむ」を 3かい 入れて じっこうしてみよう！"]},
-{id:2,step:"STEP 1：めいれいを しる",title:"うえへ すすもう",desc:"うえに むいているよ。「すすむ」で ゴールを めざそう。",size:5,start:{x:2,y:4,dir:0},goal:{x:2,y:1},rocks:[],stars:[],preset:null,hints:["ゴールは まっすぐ うえだよ。","マスの かずを かぞえてみよう。","「まえに すすむ」を 3かいだよ。"]},
-{id:3,step:"STEP 1：めいれいを しる",title:"みぎを むいてみよう",desc:"はじめに「みぎを むく」を つかうと、ゴールに むかえるよ。",size:5,start:{x:0,y:2,dir:0},goal:{x:3,y:2},rocks:[],stars:[],preset:null,hints:["ロボットは うえを むいているけど、ゴールは みぎだよ。","はじめに「みぎを むく」を 1つ 入れよう。","みぎをむく→すすむ×3 の じゅんばんだよ。"]},
-{id:4,step:"STEP 1：めいれいを しる",title:"ひだりを むいてみよう",desc:"ゴールは ひだりがわ。「ひだりを むく」を つかおう。",size:5,start:{x:4,y:2,dir:0},goal:{x:1,y:2},rocks:[],stars:[],preset:null,hints:["ゴールは ひだりがわに あるよ。","はじめに「ひだりを むく」を つかおう。","ひだりをむく→すすむ×3 だよ。"]},
-{id:5,step:"STEP 1：めいれいを しる",title:"かどを まがろう",desc:"すすんで、まがって、また すすむ。かどの まがりかたを おぼえよう。",size:5,start:{x:1,y:3,dir:0},goal:{x:3,y:1},rocks:[],stars:[],preset:null,hints:["まず まえに 2マス すすむと、かどに つくよ。","かどでは「みぎを むく」で むきを かえよう。","まえ・まえ・みぎをむく・まえ・まえ の じゅんばんだよ。"]},
-{id:6,step:"STEP 1：めいれいを しる",title:"はんたいの かど",desc:"こんどは ひだりに まがる かどだよ。",size:5,start:{x:4,y:4,dir:0},goal:{x:1,y:1},rocks:[],stars:[],preset:null,hints:["うえに 3マス すすんだら かどだよ。","かどでは「ひだりを むく」。ゴールは ひだりがわだよ。","すすむ×3→ひだりをむく→すすむ×3 だよ。"]},
-{id:7,step:"STEP 1：めいれいを しる",title:"2回 まがろう",desc:"まがるのは 2回。どっちに まがるか かんがえよう。",size:5,start:{x:0,y:2,dir:1},goal:{x:2,y:0},rocks:[],stars:[],preset:null,hints:["さいしょは みぎへ まっすぐ 2マス。","ゴールは うえ。みぎを むいているとき、うえは どっちまがり？","すすむ×2→ひだりをむく→すすむ×2 だよ。"]},
-{id:8,step:"STEP 1：めいれいを しる",title:"くねくね すすもう",desc:"みぎ・ひだり・みぎ… くねくね みちを すすもう。",size:5,start:{x:0,y:3,dir:0},goal:{x:2,y:1},rocks:[],stars:[],preset:null,hints:["まず うえに 1マス。それから みぎへ。","まがる むきは みぎ→ひだり の じゅんばんだよ。","すすむ→みぎをむく→すすむ×2→ひだりをむく→すすむ だよ。"]},
-{id:9,step:"STEP 2：くみあわせる",title:"いわを よけよう",desc:"いわに ぶつかると すすめない。まわりみちを かんがえよう。",size:5,start:{x:0,y:3,dir:1},goal:{x:4,y:1},rocks:[{x:1,y:3},{x:3,y:3},{x:2,y:0}],stars:[],preset:null,hints:["そのまま すすむと いわに ぶつかるよ。","さいしょに「ひだりを むく」で うえを むこう。","うえに 2マス、みぎを むいて 4マス すすむと ゴールだよ。"]},
-{id:10,step:"STEP 2：くみあわせる",title:"かべの むこうの ゴール",desc:"かべが みちを ふさいでいる。うえか したを まわって ゴールしよう。",size:5,start:{x:0,y:2,dir:1},goal:{x:4,y:2},rocks:[{x:2,y:1},{x:2,y:2},{x:2,y:3}],stars:[],preset:null,hints:["かべは まんなかに あるけど、うえの うえと したの したは 通れるよ。","うえまわりは 2マス のぼってから よこへ すすむよ。","ひだりをむく→すすむ×2→みぎをむく→すすむ×4→みぎをむく→すすむ×2 だよ。したまわりでも OK。"]},
-{id:11,step:"STEP 2：くみあわせる",title:"まわりこんで ゴール",desc:"まえは いわで ふさがれている。よこから まわりこもう。",size:5,start:{x:2,y:0,dir:2},goal:{x:2,y:4},rocks:[{x:2,y:1},{x:2,y:2},{x:2,y:3}],stars:[],preset:null,hints:["まえは いわ。でも よこは あいているよ。","うえを むいているときと ちがって、したを むいているときの「ひだり」は みぎがわだよ。","ひだりをむく→すすむ→みぎをむく→すすむ×4→みぎをむく→すすむ だよ。"]},
-{id:12,step:"STEP 2：くみあわせる",title:"さがるで ひっこもう",desc:"まわりは いわだらけ。でも うしろは あいている。「さがる」を つかおう。",size:5,start:{x:2,y:2,dir:0},goal:{x:2,y:4},rocks:[{x:2,y:1},{x:1,y:2},{x:3,y:2}],stars:[{x:2,y:3}],preset:null,hints:["まえに すすむと いわに ぶつかるよ。","「うしろに さがる」は、むきを かえずに うしろへ さがる めいれいだよ。","さがる を 2かい 入れると、スターを とって ゴールできるよ。"]},
-{id:13,step:"STEP 2：くみあわせる",title:"かべの すきま",desc:"かべには はしに すきまが ある。そこを とおって ゴールしよう。",size:5,start:{x:2,y:4,dir:0},goal:{x:2,y:0},rocks:[{x:1,y:1},{x:2,y:1},{x:3,y:1},{x:1,y:3},{x:2,y:3},{x:3,y:3}],stars:[],preset:null,hints:["かべは まんなかが ふさがっているけど、はしは あいているよ。","ひだりのはしを のぼる ルートを かんがえよう。","ひだりをむく→すすむ×2→みぎをむく→すすむ×4→みぎをむく→すすむ×2 だよ。みぎのはしでも OK。"]},
-{id:14,step:"STEP 2：くみあわせる",title:"おおまわり チャレンジ",desc:"まんなかは いわの かたまり。おおまわりして ゴールしよう。",size:5,start:{x:0,y:2,dir:1},goal:{x:4,y:2},rocks:[{x:2,y:2},{x:1,y:2},{x:3,y:2},{x:2,y:1},{x:2,y:3}],stars:[],preset:null,hints:["まんなかの いわには 4つ かこまれているよ。","うえを 大まわりするか、したを 大まわりするか えらぼう。","うえまわり：ひだりをむく→すすむ→みぎをむく→すすむ×4→みぎをむく→すすむ だよ。"]},
-{id:15,step:"STEP 2：くみあわせる",title:"ながい みちのり",desc:"したに すすんで、ひだりに まがって まっすぐ。ながい みちのりだよ。",size:5,start:{x:0,y:0,dir:2},goal:{x:4,y:3},rocks:[{x:2,y:1},{x:2,y:2},{x:4,y:1},{x:4,y:2}],stars:[],preset:null,hints:["まず したへ まっすぐ 3マス。","したを むいているとき、ゴール（みぎがわ）は「ひだり」まがりだよ。","すすむ×3→ひだりをむく→すすむ×4 だよ。"]},
-{id:16,step:"STEP 2：くみあわせる",title:"みちくさ スター",desc:"スターは かいしゅう しないと クリアに ならない。みちくさして とってから ゴールしよう。",size:5,start:{x:0,y:2,dir:1},goal:{x:4,y:2},rocks:[{x:2,y:2}],stars:[{x:2,y:1}],preset:null,hints:["スターを とらずに ゴールしても クリアに ならないよ。","スターは ゴールの うえに ある。まわりこんで とろう。","すすむ→ひだりをむく→すすむ→みぎをむく→すすむ×2→みぎをむく→すすむ→ひだりをむく→すすむ だよ。"]},
-{id:17,step:"STEP 2：スターと じゅんばん",title:"スターを とってから ゴール",desc:"スターを 2つ とってから ゴールする じゅんばんを かんがえよう。",size:5,start:{x:0,y:4,dir:0},goal:{x:3,y:3},rocks:[{x:1,y:2},{x:2,y:2},{x:1,y:4}],stars:[{x:0,y:1},{x:3,y:1}],preset:null,hints:["スターを とらずに ゴールしても クリアに ならないよ。","うえに 3マスで 1つめの スターが とれるよ。","みぎを むいて 3マス、また みぎを むいて 2マスだよ。"]},
-{id:18,step:"STEP 2：スターと じゅんばん",title:"スター 3つ めぐり",desc:"スターは 3つ。どの じゅんばんで まわるのが いいかな。",size:5,start:{x:2,y:4,dir:0},goal:{x:0,y:2},rocks:[],stars:[{x:2,y:0},{x:4,y:2},{x:2,y:2}],preset:null,hints:["スターを 3つ めぐって ゴールしよう。長い プログラムに ちょうせん！","まず うえへ 4マス。とちゅうで スターが 1つ とれるよ。","てっぺんで みぎを むいて 2マス、みぎを むいて 2マス、さいごは みぎを むいて 4マスだよ。"]},
-{id:19,step:"STEP 2：スターと じゅんばん",title:"さがるで スター",desc:"まえは いわ。スターは うしろに あるよ。「さがる」で とってから ゴールへ。",size:5,start:{x:1,y:1,dir:1},goal:{x:0,y:4},rocks:[{x:2,y:1}],stars:[{x:0,y:1}],preset:null,hints:["まえに すすむと いわに ぶつかるよ。","スターは うしろ。「さがる」で とりに いこう。","さがる→みぎをむく→すすむ×3 だよ。"]},
-{id:20,step:"STEP 2：スターと じゅんばん",title:"スター たんけん",desc:"スターは 2つ、ゴールは まんなか。まんなかへは したからしか はいれないよ。",size:5,start:{x:0,y:0,dir:1},goal:{x:2,y:2},rocks:[{x:2,y:1},{x:1,y:2},{x:3,y:2}],stars:[{x:4,y:0},{x:0,y:4}],preset:null,hints:["ゴールは まんなか。まんなかへは したからしか はいれないよ。","スターは みぎうえと ひだりした。どっちから まわるか きめよう。","「さがる」を つかうと みじかく なる ルートも あるよ。いろいろ 試してみよう。"]},
-{id:21,step:"STEP 2：スターと じゅんばん",title:"めいろ チャレンジ",desc:"かべの あいだを ぬって すすむ めいろ。スターも わすれずに。",size:5,start:{x:0,y:4,dir:0},goal:{x:4,y:0},rocks:[{x:1,y:1},{x:1,y:2},{x:1,y:3},{x:3,y:1},{x:3,y:2},{x:3,y:3}],stars:[{x:2,y:4}],preset:null,hints:["かべの すきまは うえの たなと したの たなだよ。","したの スターを とってから 上へ ぬける ルートも あるよ。","うえに 4マス、みぎを むいて 4マス。シンプルな ルートも あるよ。"]},
-{id:22,step:"STEP 2：スターと じゅんばん",title:"おたから ルーム",desc:"6×6の おおきな へや。スター 2つを とって、むこうがわの ゴールへ。",size:6,start:{x:0,y:5,dir:0},goal:{x:5,y:5},rocks:[{x:2,y:2},{x:2,y:3},{x:3,y:2},{x:3,y:3}],stars:[{x:0,y:0},{x:5,y:0}],preset:null,hints:["おおきな へや。まず うえの スターを めざそう。","スターは うえの りょうはしに あるよ。","すすむ×5→みぎをむく→すすむ×5→みぎをむく→すすむ×5 だよ。"]},
-{id:23,step:"STEP 2：スターと じゅんばん",title:"ダブル トンネル",desc:"かべの トンネルは 2つ。まんなかの スターも とって まっすぐ すすもう。",size:6,start:{x:0,y:3,dir:1},goal:{x:5,y:3},rocks:[{x:2,y:0},{x:2,y:1},{x:2,y:2},{x:2,y:4},{x:2,y:5},{x:4,y:0},{x:4,y:1},{x:4,y:2},{x:4,y:4},{x:4,y:5}],stars:[{x:3,y:3}],preset:null,hints:["トンネルは まんなかの たなに あるよ。","スターは トンネルの あいだに あるよ。","まっすぐ「すすむ」×5 で トンネルを ぬけられるよ。"]},
-{id:24,step:"STEP 2：スターと じゅんばん",title:"おたから めぐり",desc:"スターは かどと かど。ゴールは さいごに たどりつく かどだよ。",size:5,start:{x:4,y:4,dir:0},goal:{x:0,y:0},rocks:[{x:1,y:2},{x:2,y:2},{x:3,y:2}],stars:[{x:4,y:0},{x:0,y:4}],preset:null,hints:["スターは うえのみぎと したのひだり。ゴールは うえのひだりだよ。","ゴールに 先に つくと クリアに ならない。スターを 先に とろう。","うえの スター→もどって→したの スター→うえの ゴール、の じゅんばんだよ。"]},
-{id:25,step:"STEP 3：ふりかえり・デバッグ",title:"まちがいを なおそう 1",desc:"プログラムが もう 入っているけど、まちがっているみたい。なおしてから じっこうしよう。",size:5,start:{x:0,y:2,dir:1},goal:{x:3,y:2},rocks:[],stars:[],preset:["forward","forward","left","forward"],hints:["入っている プログラムを よく 見てみよう。","まちがいは「ひだりを むく」の ブロックだよ。","「ひだりを むく」を「まえに すすむ」に 入れかえよう。"]},
-{id:26,step:"STEP 3：ふりかえり・デバッグ",title:"まちがいを なおそう 2",desc:"まがる むきが まちがっている みたい。ブロックを 入れかえて なおそう。",size:5,start:{x:1,y:3,dir:0},goal:{x:3,y:1},rocks:[],stars:[],preset:["forward","forward","left","forward","forward"],hints:["かどで まがる むきが ちがう みたい。","まちがいは 3つめの ブロックだよ。","「ひだりを むく」を「みぎを むく」に 入れかえよう。"]},
-{id:27,step:"STEP 3：ふりかえり・デバッグ",title:"たりない めいれい",desc:"プログラムが とちゅうで 終わっている。たりない めいれいを たして 完成させよう。",size:5,start:{x:0,y:4,dir:0},goal:{x:3,y:1},rocks:[{x:1,y:2},{x:2,y:2}],stars:[{x:0,y:1}],preset:["forward","forward","forward"],hints:["スターは とれているけど、ゴールまで とどいていないね。","プログラムの つづきを 自分で たそう。","スターのあと：みぎをむく→すすむ×3→みぎをむく→すすむ×2 だよ。"]},
-{id:28,step:"STEP 3：ふりかえり・デバッグ",title:"みじかく できるかな",desc:"この プログラムでも ゴールできるけど、もっと みじかく できる。ブロックを へらして なおそう。",size:5,start:{x:0,y:2,dir:1},goal:{x:4,y:2},rocks:[],stars:[],preset:["left","forward","right","forward","forward","forward","forward","right","forward"],hints:["まず そのまま じっこうして、どんな みちを 通るか 見てみよう。","ゴールは まっすぐ みぎ。まわりみちは いらないよ。","「まえに すすむ」×4 だけで ゴールできるよ。"]},
-{id:29,step:"STEP 3：ふりかえり・デバッグ",title:"くりかえしに 気づこう",desc:"おなじ めいれいが 5つも ならんでいるね。STEP 5では「くりかえし」で みじかく かけるように なるよ。まずは そのまま じっこうして スターを とろう。",size:6,start:{x:0,y:3,dir:1},goal:{x:5,y:3},rocks:[],stars:[{x:3,y:3}],preset:["forward","forward","forward","forward","forward"],hints:["おなじ ブロックが 5つ。まずは そのまま じっこうしてみよう。","とちゅうで スターも とれるよ。","STEP 5では「くりかえし」ブロックで、この 5つを みじかく かけるように なるよ。"]},
-{id:30,step:"STEP 3：ふりかえり・デバッグ",title:"デバッグ チャレンジ",desc:"かべに ぶつかる プログラムに なっている。どこが まちがいか 見つけて なおそう。",size:5,start:{x:0,y:4,dir:0},goal:{x:4,y:0},rocks:[{x:1,y:1},{x:1,y:2},{x:1,y:3}],stars:[],preset:["forward","forward","forward","right","forward","forward"],hints:["ぶつかる ところまで じっこうして、どこで 止まるか 見てみよう。","まちがいは「すすむ」の かいすう。かどの 手前で まがっているよ。","すすむ×4→みぎをむく→すすむ×4 が ただしい かいすうだよ。"]},
-{id:31,step:"STEP 4：チャレンジ",title:"おおきな めいろ",desc:"6×6の めいろ。かべの すきまは うえと したに あるよ。",size:6,start:{x:0,y:5,dir:0},goal:{x:5,y:0},rocks:[{x:1,y:1},{x:1,y:2},{x:1,y:3},{x:1,y:4},{x:3,y:1},{x:3,y:2},{x:3,y:3},{x:3,y:4}],stars:[],preset:null,hints:["かべは 2まい。すきまは うえと しただよ。","うえの すきまを 通る ルートが みじかいよ。","すすむ×5→みぎをむく→すすむ×5 だよ。"]},
-{id:32,step:"STEP 4：チャレンジ",title:"スター コンプリート",desc:"スターは 3つの かどに ある。ぜんぶ まわってから ゴールの かどへ。",size:5,start:{x:2,y:4,dir:0},goal:{x:4,y:4},rocks:[],stars:[{x:0,y:4},{x:0,y:0},{x:4,y:0}],preset:null,hints:["スターは 3つの かど。ゴールは のこりの かどだよ。","外まわりを ぐるっと 1しゅう する つもりで かんがえよう。","ひだりをむく→すすむ×2→みぎをむく→すすむ×4→みぎをむく→すすむ×4→みぎをむく→すすむ×4 だよ。"]},
-{id:33,step:"STEP 4：チャレンジ",title:"かべだらけの へや",desc:"いわが いっぱい。とおれる みちは したの ルートだけ。",size:5,start:{x:0,y:2,dir:1},goal:{x:4,y:2},rocks:[{x:1,y:0},{x:1,y:2},{x:1,y:4},{x:3,y:0},{x:3,y:2},{x:3,y:4},{x:2,y:1}],stars:[],preset:null,hints:["うえの みちは いわで ふさがれているよ。","とおれるのは したの ルートだけ。","みぎをむく→すすむ→ひだりをむく→すすむ×4→ひだりをむく→すすむ だよ。"]},
-{id:34,step:"STEP 4：チャレンジ",title:"さがるの たつじん",desc:"「さがる」を つかいこなそう。スターを とって ゴールへ むかおう。",size:5,start:{x:2,y:2,dir:1},goal:{x:0,y:4},rocks:[{x:3,y:2},{x:2,y:1},{x:2,y:3}],stars:[{x:1,y:2}],preset:null,hints:["まわりは いわ。あいているのは うしろだけ。","スターは うしろの みちに あるよ。","さがる×2→みぎをむく→すすむ×2 だよ。"]},
-{id:35,step:"STEP 4：チャレンジ",title:"さいごの チャレンジ",desc:"スター 2つと ゴール、ぜんぶ めぐる さいごの チャレンジ。じゅんばんが 大事だよ。",size:5,start:{x:0,y:4,dir:1},goal:{x:4,y:0},rocks:[{x:1,y:2},{x:2,y:2},{x:3,y:2}],stars:[{x:4,y:4},{x:0,y:0}],preset:null,hints:["スターは みぎしたと ひだりうえ。ゴールは みぎうえだよ。","ゴールに 先に つくと クリアに ならない。じゅんばんが 大事。","うえの スター→もどって→みぎの スター→うえの ゴール、が おすすめの じゅんばんだよ。"]},
-{id:36,step:"STEP 5：くりかえし",title:"くりかえし デビュー",desc:"あたらしい ブロック「くりかえし」を つかおう。なかに「すすむ」を 入れて、5かい くりかえすと…？",size:6,start:{x:0,y:3,dir:1},goal:{x:5,y:3},rocks:[],stars:[],hints:["パレットに「くりかえし」が ふえたよ。まず おいてみよう。","「くりかえし」を えらんだまま「すすむ」を おすと、なかに 入るよ。","くりかえしの かいすうを 5かいに すると、すすむ×5 と おなじだよ。"]},
-{id:37,step:"STEP 5：くりかえし",title:"ロング ロード",desc:"ながい みちも「くりかえし」で みじかく かける。2つの くりかえしを つかおう。",size:6,start:{x:0,y:0,dir:1},goal:{x:5,y:5},rocks:[],stars:[],hints:["まず みぎへ まっすぐ 5マス。ここは くりかえし 1つめ。","かどで みぎを むいて、もう 1つ くりかえしを つかおう。","くりかえし(すすむ×5)→みぎをむく→くりかえし(すすむ×5) だよ。"]},
-{id:38,step:"STEP 5：くりかえし",title:"しかくの たんけん",desc:"四角の みちは、おなじ うごきの くりかえし。スターを とって スタートに もどろう。",size:5,start:{x:1,y:1,dir:1},goal:{x:1,y:1},rocks:[],stars:[{x:4,y:1},{x:4,y:4},{x:1,y:4}],hints:["1つの かどまで：すすむ×3→みぎをむく。これが 1セット。","その セットを 3かい くりかえすと、3つの スターが とれるよ。","さいごは すすむ×3 で スタート（ゴール）に もどるよ。"]},
-{id:39,step:"STEP 5：くりかえし",title:"かいだん のぼり",desc:"かいだんは「すすむ・みぎ・すすむ・ひだり」の くりかえし。4だん のぼろう。",size:6,start:{x:0,y:5,dir:0},goal:{x:4,y:1},rocks:[],stars:[{x:1,y:3},{x:3,y:2}],hints:["1だんぶんの うごきを 見つけよう：すすむ→みぎをむく→すすむ→ひだりをむく。","その 4つを くりかえしの なかに 入れよう。","かいすうは 4かい。スターも とちゅうで とれるよ。"]},
-{id:40,step:"STEP 5：くりかえし",title:"スター ライン",desc:"スターが 1れつに ならんでいる。くりかえしで すすみながら ぜんぶ とろう。",size:6,start:{x:0,y:2,dir:1},goal:{x:5,y:2},rocks:[],stars:[{x:1,y:2},{x:2,y:2},{x:3,y:2},{x:4,y:2}],hints:["すすむたびに スターが とれる みちだよ。","「くりかえし」に すすむを 入れて 5かい。","ゴールまで 5マス。かいすうは 5かいだよ。"]},
-{id:41,step:"STEP 5：くりかえし",title:"かいだん チャレンジ",desc:"かいだんの くりかえし おぼえた？さいごは まっすぐ のぼって ゴール。",size:6,start:{x:0,y:5,dir:0},goal:{x:3,y:0},rocks:[{x:0,y:2},{x:1,y:1},{x:5,y:5},{x:4,y:4},{x:5,y:0}],stars:[{x:2,y:3},{x:3,y:2}],hints:["うごきは ミッション39と おなじ パターンだよ。","くりかえしは 3かい。そこから すすむ×2 で ゴール。","いわは みちの そとに あるだけ。あんしんして パターンを つかおう。"]},
-{id:42,step:"STEP 5：くりかえし",title:"へやの おそうじ",desc:"へやを すみずみまで おそうじ。たての みちを 3本、くりかえしで すすもう。",size:6,start:{x:0,y:5,dir:0},goal:{x:2,y:0},rocks:[],stars:[{x:0,y:2},{x:1,y:3},{x:2,y:1}],hints:["たての みち 1本は すすむ×5＝くりかえし 1つ。","よこへ 1マス うつる うごきを はさんで、つぎの たて みちへ。","くりかえしは 3つ つかうよ。スターは みちの とちゅうに あるよ。"]},
-{id:43,step:"STEP 5：くりかえし",title:"おおきな しかく",desc:"6×6の おおきな 四角。1へんは すすむ×5。くりかえしで ぐるっと まわろう。",size:6,start:{x:0,y:5,dir:0},goal:{x:0,y:5},rocks:[],stars:[{x:0,y:0},{x:5,y:0},{x:5,y:5}],hints:["1へん：すすむ×5→みぎをむく。これを くりかえそう。","3へんぶん くりかえすと、スター 3つが とれるよ。","さいごの 1へんは すすむ×5 で スタートに もどるよ。"]},
-{id:44,step:"STEP 5：くりかえし",title:"入れ子 しかく",desc:"「くりかえしの なかに くりかえし」＝入れ子。ちいさな 四角を かいて スタートへ もどろう。",size:6,start:{x:2,y:4,dir:0},goal:{x:2,y:4},rocks:[],stars:[{x:2,y:2},{x:4,y:2},{x:4,y:4}],hints:["まず ないがわ：くりかえし(すすむ×2)で 1へん。","そとがわの くりかえしに「ないがわ＋みぎをむく」を 入れて 3かい。","さいごは くりかえし(すすむ×2)で スタート（ゴール）へ。"]},
-{id:45,step:"STEP 5：くりかえし",title:"さいごの ロングラン",desc:"スター 2つと ゴール。くりかえし 2つで かいけつしよう。",size:6,start:{x:0,y:5,dir:1},goal:{x:5,y:0},rocks:[],stars:[{x:2,y:5},{x:5,y:2}],hints:["したの へんは くりかえし(すすむ×5)。とちゅうで スター。","かどで ひだりを むいて、みぎの へんも くりかえし(すすむ×5)。","2つの くりかえしと 1つの「ひだりを むく」だけで クリアできるよ。"]}
+{id:1,step:"STEP 1：めいれいを しる",title:"まっすぐ すすもう",desc:"「すすむ」を 3つ ならべて、ゴールまで すすもう。",size:5,start:{x:0,y:2,dir:1},goal:{x:3,y:2},rocks:[],stars:[],preset:null,enemies:[{x:3,y:2,img:"ember-frost-pup",name:"エンバーフロストパップ"}],hints:["ロボットは みぎを むいているよ。そのまま すすめるね！","ゴールまで なんマスか、ゆびで かぞえてみよう。","「まえに すすむ」を 3かい 入れて じっこうしてみよう！"]},
+{id:2,step:"STEP 1：めいれいを しる",title:"うえへ すすもう",desc:"うえに むいているよ。「すすむ」で ゴールを めざそう。",size:5,start:{x:2,y:4,dir:0},goal:{x:2,y:1},rocks:[],stars:[],preset:null,enemies:[{x:2,y:1,img:"berry-leafy",name:"ベリーリーフ"}],hints:["ゴールは まっすぐ うえだよ。","マスの かずを かぞえてみよう。","「まえに すすむ」を 3かいだよ。"]},
+{id:3,step:"STEP 1：めいれいを しる",title:"みぎを むいてみよう",desc:"はじめに「みぎを むく」を つかうと、ゴールに むかえるよ。",size:5,start:{x:0,y:2,dir:0},goal:{x:3,y:2},rocks:[],stars:[],preset:null,enemies:[{x:3,y:2,img:"mizutama-kappa",name:"みずたまカッパ"}],hints:["ロボットは うえを むいているけど、ゴールは みぎだよ。","はじめに「みぎを むく」を 1つ 入れよう。","みぎをむく→すすむ×3 の じゅんばんだよ。"]},
+{id:4,step:"STEP 1：めいれいを しる",title:"ひだりを むいてみよう",desc:"ゴールは ひだりがわ。「ひだりを むく」を つかおう。",size:5,start:{x:4,y:2,dir:0},goal:{x:1,y:2},rocks:[],stars:[],preset:null,enemies:[{x:1,y:2,img:"honeycomb-bee",name:"ハニカムビー"}],hints:["ゴールは ひだりがわに あるよ。","はじめに「ひだりを むく」を つかおう。","ひだりをむく→すすむ×3 だよ。"]},
+{id:5,step:"STEP 1：めいれいを しる",title:"かどを まがろう",desc:"すすんで、まがって、また すすむ。かどの まがりかたを おぼえよう。",size:5,start:{x:1,y:3,dir:0},goal:{x:3,y:1},rocks:[],stars:[],preset:null,enemies:[{x:3,y:1,img:"shadow-crest-ferret",name:"シャドウクレストフェレット"}],hints:["まず まえに 2マス すすむと、かどに つくよ。","かどでは「みぎを むく」で むきを かえよう。","まえ・まえ・みぎをむく・まえ・まえ の じゅんばんだよ。"]},
+{id:6,step:"STEP 1：めいれいを しる",title:"はんたいの かど",desc:"こんどは ひだりに まがる かどだよ。",size:5,start:{x:4,y:4,dir:0},goal:{x:1,y:1},rocks:[],stars:[],preset:null,enemies:[{x:1,y:1,img:"cobalt-blade-mantis",name:"コバルトブレードカマキリ"}],hints:["うえに 3マス すすんだら かどだよ。","かどでは「ひだりを むく」。ゴールは ひだりがわだよ。","すすむ×3→ひだりをむく→すすむ×3 だよ。"]},
+{id:7,step:"STEP 1：めいれいを しる",title:"2回 まがろう",desc:"まがるのは 2回。どっちに まがるか かんがえよう。",size:5,start:{x:0,y:2,dir:1},goal:{x:2,y:0},rocks:[],stars:[],preset:null,enemies:[{x:2,y:0,img:"duskblade-fox",name:"ダスクブレードフォックス"}],hints:["さいしょは みぎへ まっすぐ 2マス。","ゴールは うえ。みぎを むいているとき、うえは どっちまがり？","すすむ×2→ひだりをむく→すすむ×2 だよ。"]},
+{id:8,step:"STEP 1：めいれいを しる",title:"くねくね すすもう",desc:"みぎ・ひだり・みぎ… くねくね みちを すすもう。",size:5,start:{x:0,y:3,dir:0},goal:{x:2,y:1},rocks:[],stars:[],preset:null,enemies:[{x:2,y:1,img:"root-tangle-goblin",name:"ルートタングルゴブリン"}],hints:["まず うえに 1マス。それから みぎへ。","まがる むきは みぎ→ひだり の じゅんばんだよ。","すすむ→みぎをむく→すすむ×2→ひだりをむく→すすむ だよ。"]},
+{id:9,step:"STEP 2：くみあわせる",title:"いわを よけよう",desc:"いわに ぶつかると すすめない。まわりみちを かんがえよう。",size:5,start:{x:0,y:3,dir:1},goal:{x:4,y:1},rocks:[{x:1,y:3},{x:3,y:3},{x:2,y:0}],stars:[],preset:null,enemies:[{x:4,y:1,img:"mossy-porcupine",name:"モッシーヤマアラシ"}],hints:["そのまま すすむと いわに ぶつかるよ。","さいしょに「ひだりを むく」で うえを むこう。","うえに 2マス、みぎを むいて 4マス すすむと ゴールだよ。"]},
+{id:10,step:"STEP 2：くみあわせる",title:"かべの むこうの ゴール",desc:"かべが みちを ふさいでいる。うえか したを まわって ゴールしよう。",size:5,start:{x:0,y:2,dir:1},goal:{x:4,y:2},rocks:[{x:2,y:1},{x:2,y:2},{x:2,y:3}],stars:[],preset:null,enemies:[{x:4,y:2,img:"yume-kurage",name:"ゆめクラゲ"}],hints:["かべは まんなかに あるけど、うえの うえと したの したは 通れるよ。","うえまわりは 2マス のぼってから よこへ すすむよ。","ひだりをむく→すすむ×2→みぎをむく→すすむ×4→みぎをむく→すすむ×2 だよ。したまわりでも OK。"]},
+{id:11,step:"STEP 2：くみあわせる",title:"まわりこんで ゴール",desc:"まえは いわで ふさがれている。よこから まわりこもう。",size:5,start:{x:2,y:0,dir:2},goal:{x:2,y:4},rocks:[{x:2,y:1},{x:2,y:2},{x:2,y:3}],stars:[],preset:null,enemies:[{x:2,y:4,img:"kuwagata-stag-beetle",name:"クワガタマン"}],hints:["まえは いわ。でも よこは あいているよ。","うえを むいているときと ちがって、したを むいているときの「ひだり」は みぎがわだよ。","ひだりをむく→すすむ→みぎをむく→すすむ×4→みぎをむく→すすむ だよ。"]},
+{id:12,step:"STEP 2：くみあわせる",title:"さがるで ひっこもう",desc:"まわりは いわだらけ。でも うしろは あいている。「さがる」を つかおう。",size:5,start:{x:2,y:2,dir:0},goal:{x:2,y:4},rocks:[{x:2,y:1},{x:1,y:2},{x:3,y:2}],stars:[{x:2,y:3}],preset:null,enemies:[{x:2,y:4,img:"sumi-squid",name:"すみイカ"}],hints:["まえに すすむと いわに ぶつかるよ。","「うしろに さがる」は、むきを かえずに うしろへ さがる めいれいだよ。","さがる を 2かい 入れると、スターを とって ゴールできるよ。"]},
+{id:13,step:"STEP 2：くみあわせる",title:"かべの すきま",desc:"かべには はしに すきまが ある。そこを とおって ゴールしよう。",size:5,start:{x:2,y:4,dir:0},goal:{x:2,y:0},rocks:[{x:1,y:1},{x:2,y:1},{x:3,y:1},{x:1,y:3},{x:2,y:3},{x:3,y:3}],stars:[],preset:null,enemies:[{x:2,y:0,img:"korogari-armadillo",name:"ころがりアルマジロ"}],hints:["かべは まんなかが ふさがっているけど、はしは あいているよ。","ひだりのはしを のぼる ルートを かんがえよう。","ひだりをむく→すすむ×2→みぎをむく→すすむ×4→みぎをむく→すすむ×2 だよ。みぎのはしでも OK。"]},
+{id:14,step:"STEP 2：くみあわせる",title:"おおまわり チャレンジ",desc:"まんなかは いわの かたまり。おおまわりして ゴールしよう。",size:5,start:{x:0,y:2,dir:1},goal:{x:4,y:2},rocks:[{x:2,y:2},{x:1,y:2},{x:3,y:2},{x:2,y:1},{x:2,y:3}],stars:[],preset:null,enemies:[{x:4,y:2,img:"acorn-leafy",name:"どんぐりリーフ"}],hints:["まんなかの いわには 4つ かこまれているよ。","うえを 大まわりするか、したを 大まわりするか えらぼう。","うえまわり：ひだりをむく→すすむ→みぎをむく→すすむ×4→みぎをむく→すすむ だよ。"]},
+{id:15,step:"STEP 2：くみあわせる",title:"ながい みちのり",desc:"したに すすんで、ひだりに まがって まっすぐ。ながい みちのりだよ。",size:5,start:{x:0,y:0,dir:2},goal:{x:4,y:3},rocks:[{x:2,y:1},{x:2,y:2},{x:4,y:1},{x:4,y:2}],stars:[],preset:null,enemies:[{x:4,y:3,img:"autumn-mushroom",name:"オータムキノコ"}],hints:["まず したへ まっすぐ 3マス。","したを むいているとき、ゴール（みぎがわ）は「ひだり」まがりだよ。","すすむ×3→ひだりをむく→すすむ×4 だよ。"]},
+{id:16,step:"STEP 2：くみあわせる",title:"みちくさ スター",desc:"スターは かいしゅう しないと クリアに ならない。みちくさして とってから ゴールしよう。",size:5,start:{x:0,y:2,dir:1},goal:{x:4,y:2},rocks:[{x:2,y:2}],stars:[{x:2,y:1}],preset:null,enemies:[{x:4,y:2,img:"tidal-newt",name:"タイダルイモリ"}],hints:["スターを とらずに ゴールしても クリアに ならないよ。","スターは ゴールの うえに ある。まわりこんで とろう。","すすむ→ひだりをむく→すすむ→みぎをむく→すすむ×2→みぎをむく→すすむ→ひだりをむく→すすむ だよ。"]},
+{id:17,step:"STEP 2：スターと じゅんばん",title:"スターを とってから ゴール",desc:"スターを 2つ とってから ゴールする じゅんばんを かんがえよう。",size:5,start:{x:0,y:4,dir:0},goal:{x:3,y:3},rocks:[{x:1,y:2},{x:2,y:2},{x:1,y:4}],stars:[{x:0,y:1},{x:3,y:1}],preset:null,enemies:[{x:0,y:3,img:"cloud-rain-rabbit",name:"くもあめウサギ"},{x:3,y:3,img:"sprout-shell-turtle",name:"スプラウトシェルカメ"}],hints:["スターを とらずに ゴールしても クリアに ならないよ。","うえに 3マスで 1つめの スターが とれるよ。","みぎを むいて 3マス、また みぎを むいて 2マスだよ。"]},
+{id:18,step:"STEP 2：スターと じゅんばん",title:"スター 3つ めぐり",desc:"スターは 3つ。どの じゅんばんで まわるのが いいかな。",size:5,start:{x:2,y:4,dir:0},goal:{x:0,y:2},rocks:[],stars:[{x:2,y:0},{x:4,y:2},{x:2,y:2}],preset:null,enemies:[{x:0,y:2,img:"puddle-mudling",name:"みずたまりマドリン"}],hints:["スターを 3つ めぐって ゴールしよう。長い プログラムに ちょうせん！","まず うえへ 4マス。とちゅうで スターが 1つ とれるよ。","てっぺんで みぎを むいて 2マス、みぎを むいて 2マス、さいごは みぎを むいて 4マスだよ。"]},
+{id:19,step:"STEP 2：スターと じゅんばん",title:"さがるで スター",desc:"まえは いわ。スターは うしろに あるよ。「さがる」で とってから ゴールへ。",size:5,start:{x:1,y:1,dir:1},goal:{x:0,y:4},rocks:[{x:2,y:1}],stars:[{x:0,y:1}],preset:null,enemies:[{x:0,y:4,img:"shadow-crest-lynx",name:"シャドウクレストリンクス"}],hints:["まえに すすむと いわに ぶつかるよ。","スターは うしろ。「さがる」で とりに いこう。","さがる→みぎをむく→すすむ×3 だよ。"]},
+{id:20,step:"STEP 2：スターと じゅんばん",title:"スター たんけん",desc:"スターは 2つ、ゴールは まんなか。まんなかへは したからしか はいれないよ。",size:5,start:{x:0,y:0,dir:1},goal:{x:2,y:2},rocks:[{x:2,y:1},{x:1,y:2},{x:3,y:2}],stars:[{x:4,y:0},{x:0,y:4}],preset:null,enemies:[{x:2,y:3,img:"thunderclaw-ram",name:"サンダークローラム"},{x:2,y:2,img:"moonlit-wisp",name:"月あかりウィスプ"}],hints:["ゴールは まんなか。まんなかへは したからしか はいれないよ。","スターは みぎうえと ひだりした。どっちから まわるか きめよう。","「さがる」を つかうと みじかく なる ルートも あるよ。いろいろ 試してみよう。"]},
+{id:21,step:"STEP 2：スターと じゅんばん",title:"めいろ チャレンジ",desc:"かべの あいだを ぬって すすむ めいろ。スターも わすれずに。",size:5,start:{x:0,y:4,dir:0},goal:{x:4,y:0},rocks:[{x:1,y:1},{x:1,y:2},{x:1,y:3},{x:3,y:1},{x:3,y:2},{x:3,y:3}],stars:[{x:2,y:4}],preset:null,enemies:[{x:4,y:0,img:"hollow-hat-scarecrow",name:"ホロウハットかかし"}],hints:["かべの すきまは うえの たなと したの たなだよ。","したの スターを とってから 上へ ぬける ルートも あるよ。","うえに 4マス、みぎを むいて 4マス。シンプルな ルートも あるよ。"]},
+{id:22,step:"STEP 2：スターと じゅんばん",title:"おたから ルーム",desc:"6×6の おおきな へや。スター 2つを とって、むこうがわの ゴールへ。",size:6,start:{x:0,y:5,dir:0},goal:{x:5,y:5},rocks:[{x:2,y:2},{x:2,y:3},{x:3,y:2},{x:3,y:3}],stars:[{x:0,y:0},{x:5,y:0}],preset:null,enemies:[{x:5,y:5,img:"paper-crane-spirit",name:"ペーパーつる精霊"}],hints:["おおきな へや。まず うえの スターを めざそう。","スターは うえの りょうはしに あるよ。","すすむ×5→みぎをむく→すすむ×5→みぎをむく→すすむ×5 だよ。"]},
+{id:23,step:"STEP 2：スターと じゅんばん",title:"ダブル トンネル",desc:"かべの トンネルは 2つ。まんなかの スターも とって まっすぐ すすもう。",size:6,start:{x:0,y:3,dir:1},goal:{x:5,y:3},rocks:[{x:2,y:0},{x:2,y:1},{x:2,y:2},{x:2,y:4},{x:2,y:5},{x:4,y:0},{x:4,y:1},{x:4,y:2},{x:4,y:4},{x:4,y:5}],stars:[{x:3,y:3}],preset:null,enemies:[{x:2,y:3,img:"sango-octopus",name:"サンゴタコ"},{x:5,y:3,img:"tanpopo-fluff-fairy",name:"たんぽぽワタゲ"}],hints:["トンネルは まんなかの たなに あるよ。","スターは トンネルの あいだに あるよ。","まっすぐ「すすむ」×5 で トンネルを ぬけられるよ。"]},
+{id:24,step:"STEP 2：スターと じゅんばん",title:"おたから めぐり",desc:"スターは かどと かど。ゴールは さいごに たどりつく かどだよ。",size:5,start:{x:4,y:4,dir:0},goal:{x:0,y:0},rocks:[{x:1,y:2},{x:2,y:2},{x:3,y:2}],stars:[{x:4,y:0},{x:0,y:4}],preset:null,enemies:[{x:0,y:0,img:"nanahoshi-ladybug",name:"ほしぼしテントウ"}],hints:["スターは うえのみぎと したのひだり。ゴールは うえのひだりだよ。","ゴールに 先に つくと クリアに ならない。スターを 先に とろう。","うえの スター→もどって→したの スター→うえの ゴール、の じゅんばんだよ。"]},
+{id:25,step:"STEP 3：ふりかえり・デバッグ",title:"まちがいを なおそう 1",desc:"プログラムが もう 入っているけど、まちがっているみたい。なおしてから じっこうしよう。",size:5,start:{x:0,y:2,dir:1},goal:{x:3,y:2},rocks:[],stars:[],preset:["forward","forward","left","forward"],enemies:[{x:3,y:2,img:"kaze-cheetah",name:"かぜチーター"}],hints:["入っている プログラムを よく 見てみよう。","まちがいは「ひだりを むく」の ブロックだよ。","「ひだりを むく」を「まえに すすむ」に 入れかえよう。"]},
+{id:26,step:"STEP 3：ふりかえり・デバッグ",title:"まちがいを なおそう 2",desc:"まがる むきが まちがっている みたい。ブロックを 入れかえて なおそう。",size:5,start:{x:1,y:3,dir:0},goal:{x:3,y:1},rocks:[],stars:[],preset:["forward","forward","left","forward","forward"],enemies:[{x:3,y:1,img:"onsen-capybara",name:"おんせんカピバラ"}],hints:["かどで まがる むきが ちがう みたい。","まちがいは 3つめの ブロックだよ。","「ひだりを むく」を「みぎを むく」に 入れかえよう。"]},
+{id:27,step:"STEP 3：ふりかえり・デバッグ",title:"たりない めいれい",desc:"プログラムが とちゅうで 終わっている。たりない めいれいを たして 完成させよう。",size:5,start:{x:0,y:4,dir:0},goal:{x:3,y:1},rocks:[{x:1,y:2},{x:2,y:2}],stars:[{x:0,y:1}],preset:["forward","forward","forward"],enemies:[{x:3,y:1,img:"yukimaru-snow-puff",name:"ゆきまるスノーパフ"}],hints:["スターは とれているけど、ゴールまで とどいていないね。","プログラムの つづきを 自分で たそう。","スターのあと：みぎをむく→すすむ×3→みぎをむく→すすむ×2 だよ。"]},
+{id:28,step:"STEP 3：ふりかえり・デバッグ",title:"みじかく できるかな",desc:"この プログラムでも ゴールできるけど、もっと みじかく できる。ブロックを へらして なおそう。",size:5,start:{x:0,y:2,dir:1},goal:{x:4,y:2},rocks:[],stars:[],preset:["left","forward","right","forward","forward","forward","forward","right","forward"],enemies:[{x:4,y:2,img:"star-bat",name:"スターバット"}],hints:["まず そのまま じっこうして、どんな みちを 通るか 見てみよう。","ゴールは まっすぐ みぎ。まわりみちは いらないよ。","「まえに すすむ」×4 だけで ゴールできるよ。"]},
+{id:29,step:"STEP 3：ふりかえり・デバッグ",title:"くりかえしに 気づこう",desc:"おなじ めいれいが 5つも ならんでいるね。STEP 5では「くりかえし」で みじかく かけるように なるよ。まずは そのまま じっこうして スターを とろう。",size:6,start:{x:0,y:3,dir:1},goal:{x:5,y:3},rocks:[],stars:[{x:3,y:3}],preset:["forward","forward","forward","forward","forward"],enemies:[{x:5,y:3,img:"sunstone-golem",name:"サンストーンゴーレム"}],hints:["おなじ ブロックが 5つ。まずは そのまま じっこうしてみよう。","とちゅうで スターも とれるよ。","STEP 5では「くりかえし」ブロックで、この 5つを みじかく かけるように なるよ。"]},
+{id:30,step:"STEP 3：ふりかえり・デバッグ",title:"デバッグ チャレンジ",desc:"かべに ぶつかる プログラムに なっている。どこが まちがいか 見つけて なおそう。",size:5,start:{x:0,y:4,dir:0},goal:{x:4,y:0},rocks:[{x:1,y:1},{x:1,y:2},{x:1,y:3}],stars:[],preset:["forward","forward","forward","right","forward","forward"],enemies:[{x:4,y:0,img:"moon-moth",name:"月夜のモス"}],hints:["ぶつかる ところまで じっこうして、どこで 止まるか 見てみよう。","まちがいは「すすむ」の かいすう。かどの 手前で まがっているよ。","すすむ×4→みぎをむく→すすむ×4 が ただしい かいすうだよ。"]},
+{id:31,step:"STEP 4：チャレンジ",title:"おおきな めいろ",desc:"6×6の めいろ。かべの すきまは うえと したに あるよ。",size:6,start:{x:0,y:5,dir:0},goal:{x:5,y:0},rocks:[{x:1,y:1},{x:1,y:2},{x:1,y:3},{x:1,y:4},{x:3,y:1},{x:3,y:2},{x:3,y:3},{x:3,y:4}],stars:[],preset:null,enemies:[{x:5,y:0,img:"rainbow-shell-snail",name:"レインボーシェル・スネイル"}],hints:["かべは 2まい。すきまは うえと しただよ。","うえの すきまを 通る ルートが みじかいよ。","すすむ×5→みぎをむく→すすむ×5 だよ。"]},
+{id:32,step:"STEP 4：チャレンジ",title:"スター コンプリート",desc:"スターは 3つの かどに ある。ぜんぶ まわってから ゴールの かどへ。",size:5,start:{x:2,y:4,dir:0},goal:{x:4,y:4},rocks:[],stars:[{x:0,y:4},{x:0,y:0},{x:4,y:0}],preset:null,enemies:[{x:4,y:4,img:"honeydrop-bear",name:"ハニードロップベア"}],hints:["スターは 3つの かど。ゴールは のこりの かどだよ。","外まわりを ぐるっと 1しゅう する つもりで かんがえよう。","ひだりをむく→すすむ×2→みぎをむく→すすむ×4→みぎをむく→すすむ×4→みぎをむく→すすむ×4 だよ。"]},
+{id:33,step:"STEP 4：チャレンジ",title:"かべだらけの へや",desc:"いわが いっぱい。とおれる みちは したの ルートだけ。",size:5,start:{x:0,y:2,dir:1},goal:{x:4,y:2},rocks:[{x:1,y:0},{x:1,y:2},{x:1,y:4},{x:3,y:0},{x:3,y:2},{x:3,y:4},{x:2,y:1}],stars:[],preset:null,enemies:[{x:0,y:3,img:"prism-tail-drake",name:"プリズムテイルドレイク"},{x:4,y:3,img:"shadow-puppet-cat",name:"シャドウあやつりネコ"},{x:4,y:2,img:"sango-octopus",name:"サンゴタコ"}],hints:["うえの みちは いわで ふさがれているよ。","とおれるのは したの ルートだけ。","みぎをむく→すすむ→ひだりをむく→すすむ×4→ひだりをむく→すすむ だよ。"]},
+{id:34,step:"STEP 4：チャレンジ",title:"さがるの たつじん",desc:"「さがる」を つかいこなそう。スターを とって ゴールへ むかおう。",size:5,start:{x:2,y:2,dir:1},goal:{x:0,y:4},rocks:[{x:3,y:2},{x:2,y:1},{x:2,y:3}],stars:[{x:1,y:2}],preset:null,enemies:[{x:0,y:4,img:"lantern-eye-moth",name:"ランタンアイモス"}],hints:["まわりは いわ。あいているのは うしろだけ。","スターは うしろの みちに あるよ。","さがる×2→みぎをむく→すすむ×2 だよ。"]},
+{id:35,step:"STEP 4：チャレンジ",title:"さいごの チャレンジ",desc:"スター 2つと ゴール、ぜんぶ めぐる さいごの チャレンジ。じゅんばんが 大事だよ。",size:5,start:{x:0,y:4,dir:1},goal:{x:4,y:0},rocks:[{x:1,y:2},{x:2,y:2},{x:3,y:2}],stars:[{x:4,y:4},{x:0,y:0}],preset:null,enemies:[{x:4,y:0,img:"cogwheel-beetle",name:"コグホイール甲虫"}],hints:["スターは みぎしたと ひだりうえ。ゴールは みぎうえだよ。","ゴールに 先に つくと クリアに ならない。じゅんばんが 大事。","うえの スター→もどって→みぎの スター→うえの ゴール、が おすすめの じゅんばんだよ。"]},
+{id:36,step:"STEP 5：くりかえし",title:"くりかえし デビュー",desc:"あたらしい ブロック「くりかえし」を つかおう。なかに「すすむ」を 入れて、5かい くりかえすと…？",size:6,start:{x:0,y:3,dir:1},goal:{x:5,y:3},rocks:[],stars:[],enemies:[{x:5,y:3,img:"hoshizora-penguin",name:"ほしぞらペンギン"}],hints:["パレットに「くりかえし」が ふえたよ。まず おいてみよう。","「くりかえし」を えらんだまま「すすむ」を おすと、なかに 入るよ。","くりかえしの かいすうを 5かいに すると、すすむ×5 と おなじだよ。"]},
+{id:37,step:"STEP 5：くりかえし",title:"ロング ロード",desc:"ながい みちも「くりかえし」で みじかく かける。2つの くりかえしを つかおう。",size:6,start:{x:0,y:0,dir:1},goal:{x:5,y:5},rocks:[],stars:[],enemies:[{x:5,y:5,img:"yoru-glider",name:"よるモモンガ"}],hints:["まず みぎへ まっすぐ 5マス。ここは くりかえし 1つめ。","かどで みぎを むいて、もう 1つ くりかえしを つかおう。","くりかえし(すすむ×5)→みぎをむく→くりかえし(すすむ×5) だよ。"]},
+{id:38,step:"STEP 5：くりかえし",title:"しかくの たんけん",desc:"四角の みちは、おなじ うごきの くりかえし。スターを とって スタートに もどろう。",size:5,start:{x:1,y:1,dir:1},goal:{x:1,y:1},rocks:[],stars:[],enemies:[{x:4,y:1,img:"yousei-shrimp",name:"ようせいエビ"},{x:4,y:4,img:"hinoko-ember-newt",name:"ひのこイモリ"},{x:1,y:4,img:"star-bat",name:"スターバット"}],hints:["1つの かどまで：すすむ×3→みぎをむく。これが 1セット。","その セットを 3かい くりかえすと、3つの スターが とれるよ。","さいごは すすむ×3 で スタート（ゴール）に もどるよ。"]},
+{id:39,step:"STEP 5：くりかえし",title:"かいだん のぼり",desc:"かいだんは「すすむ・みぎ・すすむ・ひだり」の くりかえし。4だん のぼろう。",size:6,start:{x:0,y:5,dir:0},goal:{x:4,y:1},rocks:[],stars:[{x:1,y:3},{x:3,y:2}],enemies:[{x:4,y:1,img:"taiyo-meerkat",name:"たいようミーアキャット"}],hints:["1だんぶんの うごきを 見つけよう：すすむ→みぎをむく→すすむ→ひだりをむく。","その 4つを くりかえしの なかに 入れよう。","かいすうは 4かい。スターも とちゅうで とれるよ。"]},
+{id:40,step:"STEP 5：くりかえし",title:"スター ライン",desc:"スターが 1れつに ならんでいる。くりかえしで すすみながら ぜんぶ とろう。",size:6,start:{x:0,y:2,dir:1},goal:{x:5,y:2},rocks:[],stars:[{x:1,y:2},{x:2,y:2},{x:3,y:2},{x:4,y:2}],enemies:[{x:5,y:2,img:"koro-golem-pebble-golem",name:"ころゴーレム"}],hints:["すすむたびに スターが とれる みちだよ。","「くりかえし」に すすむを 入れて 5かい。","ゴールまで 5マス。かいすうは 5かいだよ。"]},
+{id:41,step:"STEP 5：くりかえし",title:"かいだん チャレンジ",desc:"かいだんの くりかえし おぼえた？さいごは まっすぐ のぼって ゴール。",size:6,start:{x:0,y:5,dir:0},goal:{x:3,y:0},rocks:[{x:0,y:2},{x:1,y:1},{x:5,y:5},{x:4,y:4},{x:5,y:0}],stars:[{x:2,y:3},{x:3,y:2}],enemies:[{x:3,y:0,img:"snow-mushroom",name:"スノーキノコ"}],hints:["うごきは ミッション39と おなじ パターンだよ。","くりかえしは 3かい。そこから すすむ×2 で ゴール。","いわは みちの そとに あるだけ。あんしんして パターンを つかおう。"]},
+{id:42,step:"STEP 5：くりかえし",title:"へやの おそうじ",desc:"へやを すみずみまで おそうじ。たての みちを 3本、くりかえしで すすもう。",size:6,start:{x:0,y:5,dir:0},goal:{x:2,y:0},rocks:[],stars:[{x:0,y:2},{x:1,y:3},{x:2,y:1}],enemies:[{x:2,y:0,img:"sunset-puru",name:"サンセットぷる"}],hints:["たての みち 1本は すすむ×5＝くりかえし 1つ。","よこへ 1マス うつる うごきを はさんで、つぎの たて みちへ。","くりかえしは 3つ つかうよ。スターは みちの とちゅうに あるよ。"]},
+{id:43,step:"STEP 5：くりかえし",title:"おおきな しかく",desc:"6×6の おおきな 四角。1へんは すすむ×5。くりかえしで ぐるっと まわろう。",size:6,start:{x:0,y:5,dir:0},goal:{x:0,y:5},rocks:[],stars:[],enemies:[{x:0,y:0,img:"thunder-spark-fox",name:"サンダースパークフォックス"},{x:5,y:0,img:"bubblefin-frog",name:"バブルフィンカエル"},{x:5,y:5,img:"prism-tail-drake",name:"プリズムテイルドレイク"}],hints:["1へん：すすむ×5→みぎをむく。これを くりかえそう。","3へんぶん くりかえすと、スター 3つが とれるよ。","さいごの 1へんは すすむ×5 で スタートに もどるよ。"]},
+{id:44,step:"STEP 5：くりかえし",title:"入れ子 しかく",desc:"「くりかえしの なかに くりかえし」＝入れ子。ちいさな 四角を かいて スタートへ もどろう。",size:6,start:{x:2,y:4,dir:0},goal:{x:2,y:4},rocks:[],stars:[],enemies:[{x:2,y:2,img:"dusk-feather-owl",name:"たそがれフクロウ"},{x:4,y:2,img:"stormhorn-kid",name:"ストームホーンキッド"},{x:4,y:4,img:"lantern-eye-moth",name:"ランタンアイモス"}],hints:["まず ないがわ：くりかえし(すすむ×2)で 1へん。","そとがわの くりかえしに「ないがわ＋みぎをむく」を 入れて 3かい。","さいごは くりかえし(すすむ×2)で スタート（ゴール）へ。"]},
+{id:45,step:"STEP 5：くりかえし",title:"さいごの ロングラン",desc:"スター 2つと ゴール。くりかえし 2つで かいけつしよう。",size:6,start:{x:0,y:5,dir:1},goal:{x:5,y:0},rocks:[],stars:[{x:2,y:5},{x:5,y:2}],enemies:[{x:5,y:0,img:"ribbon-tailed-mouse",name:"リボンテイルねずみ"}],hints:["したの へんは くりかえし(すすむ×5)。とちゅうで スター。","かどで ひだりを むいて、みぎの へんも くりかえし(すすむ×5)。","2つの くりかえしと 1つの「ひだりを むく」だけで クリアできるよ。"]},
+{id:46,step:"STEP 6：じょうけん",title:"もしも デビュー",desc:"まえに いわが あったら まがる「もし」ブロックが とうじょう。いわの てまえで まがれるかな？",size:5,start:{x:0,y:2,dir:1},goal:{x:3,y:4},rocks:[{x:3,y:2}],stars:[],enemies:[{x:3,y:4,img:"ironleaf-panther",name:"アイアンリーフパンサー"}],hints:["すすんで いくと、いわに ぶつかりそうな ところが あるね。","いわの てまえで「もし」の なかの「みぎを むく」が うごくよ。","すすむ×2→もし(みぎをむく)→すすむ×2→ひだりをむく→すすむ だよ。"]},
+{id:47,step:"STEP 6：じょうけん",title:"かべの てまえで まがれ",desc:"かべに ぶつかる てまえで、じどうで まがる プログラムに しよう。",size:6,start:{x:0,y:0,dir:2},goal:{x:3,y:0},rocks:[{x:0,y:3},{x:4,y:2}],stars:[],enemies:[{x:3,y:0,img:"whispering-mask-imp",name:"ささやきマスクインプ"}],hints:["まっすぐ すすむと かべ（いわ）に あたる ばしょが 2つ あるよ。","「もし」の なかに「ひだりを むく」を 入れると、かべの てまえで まがれるよ。","すすむ×2→もし(ひだり)→すすむ×3→もし(ひだり)→すすむ×2 だよ。"]},
+{id:48,step:"STEP 6：じょうけん",title:"スター かべぞい",desc:"かべに そって スターを あつめよう。とちゅうの いわは「もし」で よける。",size:6,start:{x:0,y:3,dir:1},goal:{x:4,y:3},rocks:[{x:1,y:2},{x:2,y:2},{x:3,y:2},{x:4,y:2},{x:3,y:3}],stars:[{x:2,y:3},{x:4,y:4}],enemies:[{x:4,y:3,img:"candy-coral-slug",name:"キャンディコーラルナメクジ"}],hints:["まず スターを とって すすむと、まえに いわが あるよ。","「もし」で みぎに まがって したへ。それから ひだりで もとの むきへ。","すすむ×2→もし(みぎ)→すすむ→ひだり→すすむ×2→ひだり→すすむ だよ。"]},
+{id:49,step:"STEP 6：じょうけん",title:"かべまで すすんで まがれ",desc:"「くりかえし」の なかに「もし」。かべに つくまで すすんで、まがって、また すすむ じどうプログラム。",size:6,start:{x:0,y:2,dir:1},goal:{x:4,y:0},rocks:[{x:5,y:2}],stars:[{x:2,y:2},{x:4,y:1}],enemies:[{x:4,y:0,img:"rivet-bloom-beetle",name:"リベットブルーム甲虫"}],hints:["くりかえしの なかは「もし(ひだりを むく)」「すすむ」の 2つ。","かべが なければ そのまま すすみ、かべに ついたら まがるよ。","かいすうは 6かい。スターも とちゅうで とれるよ。"]},
+{id:50,step:"STEP 6：じょうけん",title:"へいを よけて",desc:"まえに へい（いわ）が ある。まわりこんで ゴールを めざそう。",size:6,start:{x:2,y:5,dir:0},goal:{x:2,y:0},rocks:[{x:2,y:1},{x:2,y:2},{x:2,y:3}],stars:[{x:3,y:2}],enemies:[{x:2,y:0,img:"biribiri-eel",name:"ビリビリウナギ"}],hints:["1マス すすむと、まえは へい。「もし」で みぎへ まがろう。","よこへ 1マス、ひだりで うえ向きに もどして、まっすぐ のぼるよ。","てっぺんで ひだりを むいて 1マスで ゴール。"]},
+{id:51,step:"STEP 6：じょうけん",title:"もしも チャレンジ",desc:"「もし」を 2回 つかう ミッション。かべの たびに まがって ゴールへ。",size:6,start:{x:0,y:5,dir:0},goal:{x:2,y:0},rocks:[{x:0,y:2},{x:3,y:3}],stars:[{x:1,y:3},{x:2,y:1}],enemies:[{x:2,y:0,img:"hikari-butterfly",name:"ひかりチョウ"}],hints:["のぼって、かべで みぎへ、すすんで、かべで ひだりへ（うえへ）。","「もし」の なかは 1つめが「みぎを むく」、2つめが「ひだりを むく」だよ。","すすむ×2→もし(みぎ)→すすむ×2→もし(ひだり)→すすむ×3 だよ。"]},
+{id:52,step:"STEP 6：じょうけん",title:"かべ つたい ロボ",desc:"たての かべに ぶつかったら みぎへ。あとは かべに そって したへ すすもう。",size:5,start:{x:0,y:0,dir:1},goal:{x:3,y:4},rocks:[{x:2,y:0},{x:2,y:1},{x:2,y:2}],stars:[{x:1,y:2},{x:2,y:4}],enemies:[{x:3,y:4,img:"yuyake-flamingo",name:"ゆうやけフラミンゴ"}],hints:["くりかえしの なかは「もし(みぎを むく)」「すすむ」。","1かいめだけ「もし」が うごいて、あとは まっすぐ したへ。","くりかえしの あと：ひだりをむく→すすむ×2 で ゴール。"]},
+{id:53,step:"STEP 6：じょうけん",title:"スター ゲット ロボ",desc:"かべに ついたら ひだりへ まがる じどうプログラムで、スターを あつめよう。",size:6,start:{x:5,y:5,dir:0},goal:{x:2,y:2},rocks:[{x:5,y:1}],stars:[{x:5,y:3},{x:3,y:2}],enemies:[{x:2,y:2,img:"komorin-little-night-bat",name:"こもりんナイトバット"}],hints:["うえへ すすんで いくと、かべ（そと）に つく ところが あるよ。","「もし」の なかは「ひだりを むく」。かいすうは 6かい。","スターは とちゅうの みちに 2つ あるよ。"]},
+{id:54,step:"STEP 6：じょうけん",title:"かべを こえて",desc:"かべは たかくて こえられない。うえの すきままで のぼってから わたろう。",size:6,start:{x:0,y:3,dir:1},goal:{x:4,y:0},rocks:[{x:3,y:3},{x:3,y:2},{x:3,y:4}],stars:[{x:2,y:1},{x:3,y:0}],enemies:[{x:4,y:0,img:"sand-ember-newt",name:"サンドエンバーイモリ"}],hints:["くりかえし（もし＋すすむ）で、かべに そって うえへ のぼれるよ。","かいすうは 5かい。てっぺんに ついたら みぎを むこう。","そのあと すすむ×2。スターは すきまに あるよ。"]},
+{id:55,step:"STEP 6：じょうけん",title:"さいごの じょうけん",desc:"くりかえし＋もし＋ふつうの めいれいの 総合問題。かべを のぼって わたって おりよう。",size:6,start:{x:0,y:5,dir:1},goal:{x:4,y:5},rocks:[{x:3,y:5},{x:3,y:4},{x:3,y:3}],stars:[{x:2,y:2},{x:4,y:4}],enemies:[{x:4,y:5,img:"spring-moss-pup",name:"スプリングモスパップ"}],hints:["まず くりかえし（もし＋すすむ）で かべの うえまで のぼろう。かいすうは 5かい。","みぎを むいて すすむ×2、みぎを むいて すすむ×3 で ゴール。","スターは のぼった ところと、おりる とちゅうに あるよ。"]}
 ];
+function ttText(t){return t.replace(/ゴールできる/g,"てきを たおせる").replace(/ゴールしても/g,"てきを たおしても").replace(/ゴールする/g,"てきを たおす").replace(/ゴール/g,"てき")}
+MISSIONS.forEach(m=>{m.title=ttText(m.title);m.desc=ttText(m.desc);if(m.hints)m.hints=m.hints.map(ttText)});
 const BLOCKS=[
 {type:"forward",label:"まえに すすむ",desc:"1マス まえへ",icon:"↑",cls:"b-forward"},
 {type:"back",label:"うしろに さがる",desc:"むきは そのまま 1マス うしろへ",icon:"↓",cls:"b-back"},
 {type:"right",label:"みぎを むく",desc:"そのばで みぎへ 90°",icon:"↻",cls:"b-right"},
 {type:"left",label:"ひだりを むく",desc:"そのばで ひだりへ 90°",icon:"↺",cls:"b-left"},
-{type:"repeat",label:"くりかえし",desc:"なかの めいれいを なんかいも くりかえす",icon:"🔁",cls:"b-repeat"}];
+{type:"repeat",label:"くりかえし",desc:"なかの めいれいを なんかいも くりかえす",icon:"🔁",cls:"b-repeat"},
+{type:"ifwall",label:"もし まえが かべ なら",desc:"まえが いわ・そとなら、なかを うごかす",icon:"？",cls:"b-if"}];
 const META={}; BLOCKS.forEach(b=>META[b.type]=b);
 const GUIDES=[{name:"そら",color:"#38BDF8"},{name:"りく",color:"#4ADE80"},{name:"かい",color:"#A78BFA"},{name:"さく",color:"#F9A8D4"},{name:"つき",color:"#FCD34D"},{name:"なみ",color:"#60A5FA"}];
 /* ===== パートナー（ナビアン）育成：カタログの実在3体から選択・3段階進化 =====
@@ -372,7 +395,7 @@ function partnerImg(partnerId,stage){
  return NAVI_BASE+"zako/"+partnerId+".webp"}
 function partner(){return PARTNERS.find(x=>x.id===save.partner)||PARTNERS[0]}
 /* 学年のめやす（ロックではなく目安表示のみ） */
-function gradeOf(id){if(id<=8)return "1〜2年生の めやす";if(id<=16)return "2〜3年生の めやす";if(id<=24)return "3〜4年生の めやす";if(id<=30)return "4〜5年生の めやす";if(id<=35)return "5〜6年生の めやす";if(id<=40)return "3〜4年生の めやす";return "4〜5年生の めやす"}
+function gradeOf(id){if(id<=8)return "1〜2年生の めやす";if(id<=16)return "2〜3年生の めやす";if(id<=24)return "3〜4年生の めやす";if(id<=30)return "4〜5年生の めやす";if(id<=35)return "5〜6年生の めやす";if(id<=40)return "3〜4年生の めやす";if(id<=50)return "4〜5年生の めやす";return "5〜6年生の めやす"}
 const STAGES=[{at:0},{at:40},{at:100}];
 function stageOf(xp){let st=1;STAGES.forEach((s2,i)=>{if(xp>=s2.at)st=i+1});return st}
 function curXp(){return (save.xpBy&&save.xpBy[partner().id])||0}
@@ -381,6 +404,7 @@ const Snd={on:true,ctx:null,tone(f,d,type,g,delay){if(!this.on)return;try{const 
 tap(){this.tone(520,.08,"triangle",.1)},del(){this.tone(300,.09,"sine",.09)},step(){this.tone(440,.09,"sine",.09)},turn(){this.tone(587,.09,"triangle",.09)},
 star(){this.tone(784,.12,"sine",.12);this.tone(1047,.2,"sine",.12,.09)},
 bump(){this.tone(170,.16,"sawtooth",.1);this.tone(130,.2,"sawtooth",.1,.1)},
+hit(){this.tone(220,.1,"square",.13);this.tone(880,.15,"triangle",.11,.05)},
 clear(){[523,659,784,1047].forEach((f,i)=>this.tone(f,.22,"triangle",.12,i*.1))}};
 /* ===== 状態と保存 ===== */
 const KEY="codeQuest.v2";
@@ -392,12 +416,16 @@ if(save.xp&&!Object.keys(save.xpBy).length)save.xpBy[save.partner||"purun-little
 if(!PARTNERS.some(x=>x.id===save.partner))save.partner="purun-little-magic-slime";
 Snd.on=save.sound!==false;
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(save))}catch(e){}}
-let cur=1,program=[],guide=GUIDES[0],hintIdx=0,fast=false,collected=[],selId=null;
-let exec={status:"idle",queue:[],ptr:0,timer:null,activeId:null};
+let cur=1,program=[],guide=GUIDES[0],hintIdx=0,fast=false,collected=[],defeated=[],selId=null;
+let exec={status:"idle",frames:[],timer:null,activeId:null};
 let robot={x:0,y:0,dir:1,angle:90};
 let uid=0; const nid=()=>"b"+(++uid);
 const $=id=>document.getElementById(id);
 function mission(){return MISSIONS.find(m=>m.id===cur)||MISSIONS[0]}
+function missionEnemies(m){return (m.enemies&&m.enemies.length)?m.enemies:[{x:m.goal.x,y:m.goal.y,img:"koro-golem-pebble-golem",name:"ころゴーレム"}]}
+const BG_BY_STEP={"STEP 1":"grassland","STEP 2":"forest","STEP 3":"ruins","STEP 4":"volcano","STEP 5":"riverbank","STEP 6":"cave"};
+function bgFor(m){for(const k in BG_BY_STEP)if(m.step.indexOf(k)===0)return BG_BY_STEP[k];return "grassland"}
+function enemyImgUrl(id){return "https://tt-sensei.github.io/navi-character-/assets/web/fantasy/monsters/zako/"+id+".webp"}
 function setMsg(t,mood){$("naviMsg").textContent=t;const b=$("naviBubble");b.className="navi-bubble"+(mood==="warn"?" warn":mood==="hint"?" hintbg":"")}
 /* ===== トップ画面 ===== */
 function renderTop(){
@@ -429,10 +457,10 @@ function renderTop(){
 /* ===== プログラム画面 ===== */
 function buildPalette(){
  const p=$("palette");p.innerHTML="";
- BLOCKS.forEach(b=>{if(b.type==="repeat"&&cur<36)return;const btn=document.createElement("button");btn.type="button";btn.className="pbtn "+b.cls;
+ BLOCKS.forEach(b=>{if(b.type==="repeat"&&cur<36)return;if(b.type==="ifwall"&&cur<46)return;const btn=document.createElement("button");btn.type="button";btn.className="pbtn "+b.cls;
   btn.innerHTML='<span class="ic">'+b.icon+'</span><span><span class="lb">'+b.label+'</span><br><span class="ds">'+b.desc+"</span></span>";
   btn.addEventListener("click",()=>addBlock(b.type));p.appendChild(btn)});
- const note=document.createElement("p");note.className="pal-note";note.textContent=cur>=36?"「くりかえし」を えらんでから ブロックを おすと、なかに 入るよ。ならびかえは ↑↓、けすときは ×。":"プログラムは 上から じゅんばんに うごくよ。ならびかえは ↑↓、けすときは × を つかってね。";p.appendChild(note);
+ const note=document.createElement("p");note.className="pal-note";note.textContent=cur>=46?"「くりかえし」「もし」を えらんでから ブロックを おすと、なかに 入るよ。":(cur>=36?"「くりかえし」を えらんでから ブロックを おすと、なかに 入るよ。ならびかえは ↑↓、けすときは ×。":"プログラムは 上から じゅんばんに うごくよ。ならびかえは ↑↓、けすときは × を つかってね。");p.appendChild(note);
 }
 function openMission(id){
  cur=id;program=(mission().preset||[]).map(t=>({id:nid(),type:t}));selId=null;hintIdx=0;buildPalette();guide=GUIDES[Math.floor(Math.random()*GUIDES.length)];
@@ -469,14 +497,15 @@ function renderRecords(){
   list.appendChild(card)});
 }
 function resetStage(){
- stopTimer();exec={status:"idle",queue:[],ptr:0,timer:null,activeId:null};
- const m=mission();robot={x:m.start.x,y:m.start.y,dir:m.start.dir,angle:m.start.dir*90};collected=[];
+ stopTimer();exec={status:"idle",frames:[],timer:null,activeId:null};
+ const m=mission();robot={x:m.start.x,y:m.start.y,dir:m.start.dir,angle:m.start.dir*90};collected=[];defeated=[];
  renderField();updateRobot();updateRunBtn();setMsg("ブロックを タップして めいれいを つくろう！");
 }
 function renderField(){
  const m=mission(),n=m.size,box=$("gridBox");
  const avail=Math.min(window.innerHeight-330,430);const side=Math.max(280,Math.min(430,avail));
  box.style.width=side+"px";box.style.height=side+"px";
+ box.style.backgroundImage="url(https://tt-sensei.github.io/navi-character-/assets/web/fantasy/backgrounds/"+bgFor(m)+".webp)";
  const cells=$("cells");cells.style.gridTemplateColumns="repeat("+n+",1fr)";cells.style.gridTemplateRows="repeat("+n+",1fr)";cells.innerHTML="";
  for(let y=0;y<n;y++)for(let x=0;x<n;x++){const d=document.createElement("div");d.className="cell"+((x+y)%2?" alt":"");cells.appendChild(d)}
  renderObjects();
@@ -491,8 +520,9 @@ function renderObjects(){
  const m=mission(),n=m.size,o=$("objects");o.innerHTML="";o.style.position="absolute";o.style.inset="0";
  const add=(x,y,cls,txt)=>{const d=document.createElement("div");d.className="obj";d.setAttribute("style",cellPos(x,y,n));d.innerHTML='<div class="inner '+cls+'">'+txt+"</div>";o.appendChild(d)};
  add(m.start.x,m.start.y,"start-inner","START");
- add(m.goal.x,m.goal.y,"goal-inner","🚩");
  m.rocks.forEach(r=>add(r.x,r.y,"rock-inner","🪨"));
+ missionEnemies(m).forEach(e=>{if(!defeated.includes(e.x+","+e.y)){const d=document.createElement("div");d.className="obj";d.setAttribute("style",cellPos(e.x,e.y,n));d.innerHTML='<div class="inner enemy-inner"><img class="enemy-img" src="'+enemyImgUrl(e.img)+'" alt="'+e.name+'"><div class="enemy-name">'+e.name+"</div></div>";o.appendChild(d)}});
+ $("enemyNow").textContent=defeated.length;$("enemyAll").textContent=missionEnemies(m).length;
  m.stars.forEach(s=>{if(!collected.includes(s.x+","+s.y))add(s.x,s.y,"star-inner","⭐")});
  if(m.stars.length){$("starBadge").classList.remove("hidden");$("starNow").textContent=collected.length;$("starAll").textContent=m.stars.length}else{$("starBadge").classList.add("hidden")}
 }
@@ -500,10 +530,10 @@ const DIR_TXT=["↑ きた","→ ひがし","↓ みなみ","← にし"];
 function updateRobot(){$("robot").style.transform="translate("+(robot.x*100)+"%, "+(robot.y*100)+"%)";const da=$("dirArrow");if(da)da.style.transform="rotate("+robot.angle+"deg)";const dn=$("dirNow");if(dn)dn.textContent=DIR_TXT[robot.dir]}
 /* ===== プログラム編集（タップのみ） ===== */
 function findLoc(blocks,id){for(let i=0;i<blocks.length;i++){const b=blocks[i];if(b.id===id)return{list:blocks,index:i,block:b};if(b.type==="repeat"){const r=findLoc(b.children,id);if(r)return r}}return null}
-function expandBlocks(blocks,out){out=out||[];blocks.forEach(b=>{if(b.type==="repeat"){for(let i=0;i<(b.count||2);i++)expandBlocks(b.children,out)}else out.push({id:b.id,type:b.type})});return out}
-function addBlock(type){if(exec.status==="running")return;Snd.tap();const nb=type==="repeat"?{id:nid(),type,count:2,children:[]}:{id:nid(),type};
+function expandBlocks(blocks,out){out=out||[];blocks.forEach(b=>{if(b.type==="repeat"){for(let i=0;i<(b.count||2);i++)expandBlocks(b.children,out)}else if(b.type==="ifwall"){expandBlocks(b.children,out)}else out.push({id:b.id,type:b.type})});return out}
+function addBlock(type){if(exec.status==="running")return;Snd.tap();const nb=type==="repeat"?{id:nid(),type,count:2,children:[]}:((type==="ifwall")?{id:nid(),type,children:[]}:{id:nid(),type});
  const loc=selId?findLoc(program,selId):null;
- if(loc&&loc.block.type==="repeat")loc.block.children.push(nb);
+ if(loc&&(loc.block.type==="repeat"||loc.block.type==="ifwall"))loc.block.children.push(nb);
  else if(loc)loc.list.splice(loc.index+1,0,nb);
  else program.push(nb);
  selId=nb.id;renderProgram();
@@ -516,7 +546,7 @@ function renderProgram(){
 }
 function renderList(blocks,parent){
  blocks.forEach((b,i)=>{const meta=META[b.type];const row=document.createElement("div");row.className="blk "+meta.cls+(exec.activeId===b.id?" exec":"")+(selId===b.id?" sel":"");row.id="dom_"+b.id;
-  let left='<span class="left"><span class="no">'+(i+1)+'</span><span style="font-weight:900">'+meta.icon+'</span><span class="lb">'+(b.type==="repeat"?"くりかえし":meta.label)+"</span>";
+  let left='<span class="left"><span class="no">'+(i+1)+'</span><span style="font-weight:900">'+meta.icon+'</span><span class="lb">'+(b.type==="repeat"?"くりかえし":(b.type==="ifwall"?"もし まえが かべ なら":meta.label))+"</span>";
   if(b.type==="repeat")left+='<span class="cnt"><button data-a="minus" title="へらす">−</button><span class="cv">'+b.count+'かい</span><button data-a="plus" title="ふやす">＋</button></span>';
   left+="</span>";
   row.innerHTML=left+'<span class="ops"><button data-a="up" title="うえへ">↑</button><button data-a="down" title="したへ">↓</button><button data-a="del" title="けす">×</button></span>';
@@ -529,8 +559,8 @@ function renderList(blocks,parent){
   }
   row.addEventListener("click",e=>{if(e.target.closest(".ops")||e.target.closest(".cnt"))return;selId=b.id;renderProgram()});
   parent.appendChild(row);
-  if(b.type==="repeat"){const wrap=document.createElement("div");wrap.className="rep-wrap";
-   if(!b.children.length){const em=document.createElement("div");em.className="rep-empty";em.textContent="なかは からっぽ。「くりかえし」を えらんだまま ブロックを おすと 入るよ";em.addEventListener("click",()=>{selId=b.id;renderProgram()});wrap.appendChild(em)}
+  if(b.type==="repeat"||b.type==="ifwall"){const wrap=document.createElement("div");wrap.className="rep-wrap"+(b.type==="ifwall"?" ifw":"");
+   if(!b.children.length){const em=document.createElement("div");em.className="rep-empty";em.textContent=b.type==="ifwall"?"なかは からっぽ。「もし」を えらんだまま ブロックを おすと 入るよ":"なかは からっぽ。「くりかえし」を えらんだまま ブロックを おすと 入るよ";em.addEventListener("click",()=>{selId=b.id;renderProgram()});wrap.appendChild(em)}
    else renderList(b.children,wrap);
    parent.appendChild(wrap)}
  });
@@ -547,14 +577,26 @@ function runOrPause(){
  if(exec.status==="paused"){exec.status="running";updateRunBtn();schedule();return}
  if(!program.length){Snd.bump();setMsg("まだ めいれいが ないよ。ブロックを タップしてね。","warn");return}
  const keep=program.slice();resetStage();program=keep;
- exec.queue=expandBlocks(program);exec.ptr=0;exec.status="running";updateRunBtn();
+ exec.frames=[{list:program,i:0,left:1}];exec.status="running";updateRunBtn();
  setMsg("しゅっぱつ！うごきを よく 見てみよう。");schedule(200);
 }
 function schedule(ms){stopTimer();exec.timer=setTimeout(step,ms||(fast?280:580))}
+function wallAhead(){const m=mission(),DX=[0,1,0,-1],DY=[-1,0,1,0];const nx=robot.x+DX[robot.dir],ny=robot.y+DY[robot.dir];return nx<0||nx>=m.size||ny<0||ny>=m.size||m.rocks.some(r=>r.x===nx&&r.y===ny)}
+function nextLeaf(){let guard=0;
+ while(exec.frames.length&&guard++<600){const f=exec.frames[exec.frames.length-1];
+  if(f.i>=f.list.length){exec.frames.pop();if(f.left>1){f.left--;f.i=0;exec.frames.push(f)}continue}
+  const b=f.list[f.i++];
+  if(b.type==="repeat"){exec.frames.push({list:b.children,i:0,left:b.count||2});continue}
+  if(b.type==="ifwall"){if(wallAhead())exec.frames.push({list:b.children,i:0,left:1});continue}
+  return b}
+ return null}
+function spawnFx(x,y){const m=mission(),o=$("objects");const d=document.createElement("div");d.className="defeat-fx";d.setAttribute("style",cellPos(x,y,m.size));d.textContent="💥";o.appendChild(d);setTimeout(()=>d.remove(),720)}
 function step(){
  if(exec.status!=="running")return;
- if(exec.ptr>=exec.queue.length){exec.status="idle";exec.activeId=null;updateRunBtn();renderProgram();Snd.bump();setMsg("さいごまで うごいたよ。ゴールまで あと どれくらいか 見てみよう。","hint");return}
- const s=exec.queue[exec.ptr++];exec.activeId=s.id;renderProgram();
+ const s=nextLeaf();
+ if(!s){exec.status="idle";exec.activeId=null;updateRunBtn();renderProgram();Snd.bump();const mm=mission(),el=missionEnemies(mm).length-defeated.length,sl=mm.stars.length-collected.length;
+  setMsg(el>0?("プログラム おわり。てきが あと "+el+"体 のこっているよ。みちや じゅんばんを 見なおそう。"):(sl>0?("プログラム おわり。スターが あと "+sl+"こ あるよ。"):"さいごまで うごいたよ。もう少しで たおせそう！"),"hint");return}
+ exec.activeId=s.id;renderProgram();
  const m=mission(),DX=[0,1,0,-1],DY=[-1,0,1,0];
  if(s.type==="forward"||s.type==="back"){const sign=s.type==="forward"?1:-1;
   const nx=robot.x+DX[robot.dir]*sign,ny=robot.y+DY[robot.dir]*sign;
@@ -563,9 +605,9 @@ function step(){
   Snd.step();robot.x=nx;robot.y=ny;updateRobot();const rb=$("robotBody");rb.classList.remove("hop");void rb.offsetWidth;rb.classList.add("hop");
   const k=nx+","+ny;
   if(m.stars.some(st=>st.x===nx&&st.y===ny)&&!collected.includes(k)){collected.push(k);Snd.star();renderObjects();setMsg("キラッ！スターを ゲット！")}
-  if(nx===m.goal.x&&ny===m.goal.y){
-   if(collected.length<m.stars.length){exec.status="idle";updateRunBtn();Snd.bump();setMsg("ゴールに ついたけど、スターが まだ あるよ。ぜんぶ あつめよう！","warn");return}
-   onClear();return}
+  const ek=nx+","+ny,en=missionEnemies(m).find(e=>e.x===nx&&e.y===ny);
+  if(en&&!defeated.includes(ek)){defeated.push(ek);Snd.hit();renderObjects();spawnFx(nx,ny);const left=missionEnemies(m).length-defeated.length;setMsg("⚔️ "+en.name+"を たおした！"+(left>0?"（てき あと "+left+"体）":" ぜんぶ たおした！"))}
+  if(defeated.length>=missionEnemies(m).length&&collected.length>=m.stars.length){onClear();return}
  }else if(s.type==="right"){Snd.turn();robot.dir=(robot.dir+1)%4;robot.angle+=90;updateRobot()}
  else if(s.type==="left"){Snd.turn();robot.dir=(robot.dir+3)%4;robot.angle-=90;updateRobot()}
  schedule();
@@ -581,7 +623,7 @@ function onClear(){
  if(after>before){evo.classList.remove("hidden");evo.innerHTML="✨ しんか！ パートナーが「"+pt.names[after-1]+"」に そだったよ！<br><img src=\""+partnerImg(pt.id,after)+"\" alt=\""+pt.names[after-1]+"\" style=\"width:76px;height:76px;object-fit:contain\">"}
  else evo.classList.add("hidden");
  buildChips();$("reflNote").value=(save.reflections[m.id]&&save.reflections[m.id].note)||"";
- setMsg("やったね！ゴール とうたつ！");
+ setMsg("やったね！てきを ぜんぶ たおした！");
  setTimeout(()=>$("clearModal").classList.remove("hidden"),500);
 }
 /* ===== 振り返り ===== */

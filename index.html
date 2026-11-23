@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TT-sensei CODE QUEST｜考えて、動かして、創り出そう。</title>
+<style>
+:root{--bg:#EFF6FF;--card:#FFFFFF;--ink:#1E293B;--sub:#64748B;--blue:#2563EB;--line:#DBEAFE}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{margin:0;font-family:"Hiragino Maru Gothic ProN","Yu Gothic","Meiryo",sans-serif;background:var(--bg);color:var(--ink)}
+button{font-family:inherit;cursor:pointer}
+.hidden{display:none !important}
+header.topbar{background:#fff;border-bottom:2px solid var(--line);padding:8px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-badge{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#3B82F6,#4F46E5);display:flex;align-items:center;justify-content:center;font-size:22px}
+.logo h1{margin:0;font-size:19px;font-weight:900}
+.logo h1 span{color:var(--blue)}
+.logo p{margin:1px 0 0;font-size:11px;font-weight:700;color:var(--sub)}
+.hbtn{border:2px solid var(--line);background:#F8FAFC;border-radius:12px;padding:8px 12px;font-weight:800;font-size:12px;color:#334155}
+main{max-width:1180px;margin:0 auto;padding:12px 14px}
+/* ---------- トップ画面 ---------- */
+.top-grid{display:grid;grid-template-columns:340px 1fr;gap:14px;align-items:start}
+.card{background:var(--card);border:2px solid var(--line);border-radius:22px;box-shadow:0 2px 8px rgba(37,99,235,.06)}
+.partner{padding:16px;text-align:center}
+.partner h2{margin:0 0 2px;font-size:13px;color:var(--sub);letter-spacing:.08em}
+.partner-name{font-size:21px;font-weight:900;margin:2px 0}
+.stage-name{font-size:12px;font-weight:800;color:#B45309;background:#FEF3C7;border:1px solid #FDE68A;display:inline-block;padding:2px 10px;border-radius:999px}
+.monster-stage{display:flex;justify-content:center;padding:8px 0 2px}
+.xp-row{display:flex;justify-content:space-between;font-size:11px;font-weight:800;color:var(--sub);margin-top:8px}
+.xp-bar{height:14px;background:#E2E8F0;border-radius:999px;overflow:hidden;margin-top:3px}
+.xp-fill{height:100%;background:linear-gradient(90deg,#F59E0B,#F97316);border-radius:999px;transition:width .6s ease}
+.evo-road{display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:2px dashed #E2E8F0}
+.evo-step{text-align:center;font-size:10px;font-weight:800;color:#94A3B8;width:33%}
+.evo-step.now{color:#B45309}
+.evo-arrow{color:#CBD5E1;font-weight:900}
+.pchoices{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.pchoice{border:2px solid #E2E8F0;background:#fff;border-radius:16px;padding:7px 4px 6px;cursor:pointer;text-align:center;transition:transform .1s,border-color .1s}
+.pchoice:active{transform:scale(.96)}
+.pchoice img{width:56px;height:56px;object-fit:contain;display:block;margin:0 auto}
+.pchoice .pn{font-size:10.5px;font-weight:900;line-height:1.3;display:block;margin-top:2px}
+.pchoice .px{font-size:9.5px;font-weight:800;color:#94A3B8;display:block}
+.pchoice.sel{border-color:#F59E0B;background:#FFFBEB;box-shadow:0 0 0 2px #FDE68A}
+.partner-img{width:132px;height:132px;object-fit:contain}
+.evo-step img{width:46px;height:46px;object-fit:contain}
+.partner-msg{font-size:12px;font-weight:700;color:#475569;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:14px;padding:8px;margin-top:12px;line-height:1.5}
+.missions{padding:14px 16px}
+.missions h2{margin:0 0 4px;font-size:17px;font-weight:900}
+.missions .lead{margin:0 0 10px;font-size:12px;font-weight:700;color:var(--sub)}
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-height:596px;overflow-y:auto;padding-right:4px;scrollbar-width:thin}
+.mcard{border:2px solid #E2E8F0;border-radius:18px;padding:10px;background:#fff;text-align:left;transition:transform .1s,border-color .1s;min-height:118px;display:flex;flex-direction:column;gap:4px}
+.mcard:active{transform:scale(.97)}
+.mcard:hover{border-color:#93C5FD}
+.mcard.cleared{border-color:#FCD34D;background:#FFFBEB}
+.mcard .num{font-size:11px;font-weight:900;color:#fff;background:var(--blue);border-radius:999px;padding:1px 8px;align-self:flex-start}
+.mcard.cleared .num{background:#D97706}
+.mcard .ttl{font-size:14px;font-weight:900;line-height:1.35}
+.mcard .step{font-size:10px;font-weight:800;color:var(--sub)}
+.mcard .stat{margin-top:auto;font-size:11px;font-weight:900;color:#059669}
+.mcard .stat.yet{color:#94A3B8}
+/* ---------- プログラム画面 ---------- */
+.play-grid{display:grid;grid-template-columns:44% 21% 35%;gap:12px;height:calc(100vh - 118px);min-height:560px}
+.panel{background:#fff;border:2px solid var(--line);border-radius:22px;display:flex;flex-direction:column;overflow:hidden}
+.panel-head{padding:10px 14px;border-bottom:2px solid #EFF6FF;background:#F8FBFF}
+.step-badge{font-size:10px;font-weight:900;background:var(--blue);color:#fff;border-radius:999px;padding:2px 9px}
+.star-badge{float:right;font-size:11px;font-weight:900;color:#92400E;background:#FEF3C7;border:1px solid #FDE68A;border-radius:999px;padding:2px 9px}
+.mtitle{font-size:17px;font-weight:900;margin:5px 0 1px}
+.mgoal{font-size:12px;font-weight:700;color:var(--sub);margin:0;line-height:1.45}
+.field-wrap{flex:1;display:flex;align-items:center;justify-content:center;background:#F8FAFC;padding:10px;min-height:0}
+.gridbox{position:relative;background:#fff;border:2px solid #CBD5E1;border-radius:18px;padding:8px;box-shadow:inset 0 2px 8px rgba(15,23,42,.05)}
+.cells{display:grid;gap:5px;width:100%;height:100%}
+.cell{border-radius:10px;border:1px solid #E2E8F0;background:#fff}
+.cell.alt{background:#F1F5F9}
+.obj{position:absolute;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.obj .inner{width:88%;height:88%;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900}
+.goal-inner{background:#FFF1F2;border:2px solid #FDA4AF;font-size:24px}
+.start-inner{background:#EFF6FF;border:2px dashed #93C5FD;color:#2563EB;font-size:9px;align-items:flex-end !important;padding-bottom:2px}
+.rock-inner{background:#E2E8F0;border:1px solid #CBD5E1;font-size:21px}
+.star-inner{background:#FFFBEB;border:1px solid #FCD34D;font-size:21px;animation:floaty 2.2s ease-in-out infinite}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+#robot{position:absolute;z-index:5;display:flex;align-items:center;justify-content:center;transition:transform .36s cubic-bezier(.22,1,.36,1);pointer-events:none}
+#robotBody{transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+#robot.bump #robotBody{animation:bump .45s ease-in-out}
+@keyframes bump{0%,100%{transform:rotate(0)}25%{transform:translate(-4px,-2px) rotate(-7deg)}55%{transform:translate(4px,2px) rotate(6deg)}80%{transform:translate(-2px,0) rotate(-3deg)}}
+.navi{display:flex;gap:10px;padding:10px 12px;border-top:2px solid #EFF6FF;align-items:flex-start}
+.navi-face{width:46px;height:46px;border-radius:14px;background:#ECFDF5;border:2px solid #A7F3D0;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.navi-bubble{flex:1;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:16px;padding:8px 10px;min-height:52px}
+.navi-bubble.warn{background:#FFF7ED;border-color:#FED7AA}
+.navi-bubble.hintbg{background:#FFFBEB;border-color:#FDE68A}
+.navi-top{display:flex;justify-content:space-between;align-items:center}
+.navi-name{font-size:10px;font-weight:900;color:#047857}
+#naviMsg{font-size:12.5px;font-weight:700;line-height:1.5;margin:2px 0 0}
+.hintbtn{background:#FBBF24;border:none;border-radius:10px;font-weight:900;font-size:11px;padding:4px 10px;color:#451A03}
+.palette{padding:10px;overflow-y:auto;display:flex;flex-direction:column;gap:9px}
+.pal-title{padding:10px 14px;border-bottom:2px solid #EFF6FF;background:#F8FBFF;font-weight:900;font-size:14px}
+.pal-note{font-size:10px;color:var(--sub);font-weight:700}
+.pbtn{border:none;border-bottom:4px solid rgba(0,0,0,.25);border-radius:16px;color:#fff;padding:10px;display:flex;gap:10px;align-items:center;text-align:left;transition:transform .1s}
+.pbtn:active{transform:scale(.96)}
+.pbtn .ic{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:900;flex-shrink:0}
+.pbtn .lb{font-size:14.5px;font-weight:900;line-height:1.25}
+.pbtn .ds{font-size:10px;font-weight:700;opacity:.85}
+.b-forward{background:#2563EB}.b-back{background:#4F46E5}.b-right{background:#EA580C}.b-left{background:#7C3AED}
+.prog-head{padding:10px 14px;border-bottom:2px solid #EFF6FF;background:#F8FBFF;display:flex;justify-content:space-between;align-items:center}
+.prog-head b{font-size:14px}
+.count-badge{background:#DBEAFE;color:#1D4ED8;font-size:11px;font-weight:900;border-radius:999px;padding:2px 9px;margin-left:6px}
+.mini-btn{border:2px solid #E2E8F0;background:#fff;border-radius:10px;font-size:11px;font-weight:800;padding:5px 9px;color:#475569}
+.mini-btn.danger{color:#E11D48;border-color:#FECDD3;background:#FFF1F2}
+#progList{flex:1;overflow-y:auto;padding:10px;background:#F8FAFC;display:flex;flex-direction:column;gap:7px}
+.empty{border:2px dashed #CBD5E1;border-radius:16px;background:#fff;color:#94A3B8;text-align:center;padding:22px 10px;font-weight:800;font-size:12.5px;line-height:1.6}
+.blk{border-radius:14px;color:#fff;padding:7px 9px;display:flex;align-items:center;justify-content:space-between;gap:6px;border-bottom:3px solid rgba(0,0,0,.22);box-shadow:0 1px 3px rgba(15,23,42,.12)}
+.blk .left{display:flex;align-items:center;gap:8px;min-width:0}
+.blk .no{background:rgba(0,0,0,.22);border-radius:999px;min-width:23px;height:23px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900}
+.blk .lb{font-weight:900;font-size:13.5px;white-space:nowrap}
+.blk .ops{display:flex;gap:4px}
+.blk .ops button{width:29px;height:29px;border:none;border-radius:9px;background:rgba(255,255,255,.22);color:#fff;font-weight:900;font-size:13px}
+.blk.sel{outline:3px solid #F59E0B;outline-offset:-1px}
+.blk.exec{outline:4px solid #F59E0B;background:#B45309 !important}
+.confirmbar{background:#FFF1F2;border-bottom:2px solid #FECDD3;padding:8px 12px;font-size:12px;font-weight:800;color:#9F1239;display:flex;justify-content:space-between;align-items:center}
+.confirmbar button{border:none;border-radius:9px;padding:5px 11px;font-weight:900}
+.controls{padding:11px;border-top:2px solid #EFF6FF;display:grid;grid-template-columns:7fr 5fr;gap:9px}
+.runbtn{border:none;border-bottom:5px solid #047857;border-radius:18px;background:#10B981;color:#fff;font-size:18px;font-weight:900;padding:13px}
+.runbtn.pause{background:#F59E0B;border-color:#B45309}
+.runbtn.resume{background:#2563EB;border-color:#1E40AF}
+.resetbtn{border:none;border-bottom:5px solid #CBD5E1;border-radius:18px;background:#F1F5F9;color:#334155;font-size:14px;font-weight:900;padding:13px}
+/* ---------- モーダル ---------- */
+.modal{position:fixed;inset:0;background:rgba(15,23,42,.5);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.modal-card{background:#fff;border-radius:26px;max-width:520px;width:100%;overflow:hidden;border:3px solid #FCD34D;animation:pop .25s ease}
+@keyframes pop{from{opacity:0;transform:scale(.9) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.modal-head{background:linear-gradient(90deg,#FBBF24,#F97316);text-align:center;padding:16px}
+.modal-head h3{margin:4px 0;font-size:23px;font-weight:900}
+.modal-head p{margin:0;font-size:12px;font-weight:800}
+.modal-body{padding:16px 18px}
+.evo-announce{background:#FFFBEB;border:2px solid #FCD34D;border-radius:16px;padding:10px;text-align:center;font-weight:900;color:#92400E;margin-bottom:12px}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 12px}
+.chip{border:2px solid #E2E8F0;background:#F8FAFC;border-radius:13px;padding:9px;font-weight:800;font-size:12.5px;text-align:left;color:#334155}
+.chip.on{border-color:#2563EB;background:#EFF6FF;color:#1E40AF}
+.modal-actions{display:flex;gap:9px}
+.modal-actions button{flex:1;border:none;border-radius:15px;padding:12px;font-weight:900;font-size:14px}
+.btn-next{background:#2563EB;color:#fff;border-bottom:4px solid #1E40AF !important}
+.btn-retry{background:#F1F5F9;color:#334155}
+.note-input{width:100%;border:2px solid #E2E8F0;border-radius:12px;padding:9px;font-size:13px;font-weight:700;font-family:inherit}
+@media (max-width:900px){.top-grid{grid-template-columns:1fr}.play-grid{grid-template-columns:1fr;height:auto}.mgrid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="logo">
+    <div class="logo-badge">🤖</div>
+    <div>
+      <h1>TT-sensei <span>CODE QUEST</span></h1>
+      <p>考えて、動かして、創り出そう。</p>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button class="hbtn hidden" id="btnBackTop" type="button">← ミッションいちらん</button>
+    <button class="hbtn" id="btnSound" type="button">🔊 おと ON</button>
+  </div>
+</header>
+
+<!-- ================= トップ画面 ================= -->
+<main id="screenTop">
+  <div class="top-grid">
+    <section class="card partner">
+      <h2>きみの パートナー</h2>
+      <div class="monster-stage" id="partnerArt"></div>
+      <div class="partner-name" id="partnerName">ぷにまる</div>
+      <div><span class="stage-name" id="partnerStage">ステージ 1：ぷにまる</span></div>
+      <div class="xp-row"><span>いくせい ポイント</span><span id="xpText">0 XP</span></div>
+      <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
+      <div class="xp-row"><span id="xpNext">つぎの しんかまで あと 40 XP</span><span id="clearCount">クリア 0/8</span></div>
+      <div class="evo-road" id="evoRoad"></div>
+      <p class="partner-msg" id="partnerMsg">ミッションを クリアすると ポイントが たまって、パートナーが そだつよ。くりかえし クリアしても 少し たまるよ。</p>
+      <div class="pchoices" id="partnerChoices"></div>
+      <p style="font-size:10.5px;font-weight:800;color:#94A3B8;margin:7px 0 0">パートナーは いつでも かえられるよ。それぞれ べつべつに そだつよ。</p>
+    </section>
+    <section class="card missions">
+      <h2>ミッションを えらぼう</h2>
+      <p class="lead">STEP 1〜4：めいれいを しって、くみあわせて、なおして、ちょうせんしよう。どの ミッションからでも ちょうせんできるよ。</p>
+      <div class="mgrid" id="missionGrid"></div>
+    </section>
+  </div>
+</main>
+
+<!-- ================= プログラム画面 ================= -->
+<main id="screenPlay" class="hidden" style="padding-top:10px">
+  <div class="play-grid">
+    <section class="panel">
+      <div class="panel-head">
+        <span class="step-badge" id="mStep">STEP 1</span>
+        <span class="star-badge hidden" id="starBadge">★ <span id="starNow">0</span>/<span id="starAll">0</span></span>
+        <div class="mtitle" id="mTitle">ミッション 1</div>
+        <p class="mgoal" id="mGoal"></p>
+      </div>
+      <div class="field-wrap">
+        <div class="gridbox" id="gridBox">
+          <div class="cells" id="cells"></div>
+          <div id="objects"></div>
+          <div id="robot"><div id="robotBody"></div></div>
+        </div>
+      </div>
+      <div class="navi">
+        <div class="navi-face" id="guideFace"></div>
+        <div class="navi-bubble" id="naviBubble">
+          <div class="navi-top">
+            <span class="navi-name" id="guideName">ガイド：そら</span>
+            <button class="hintbtn" id="btnHint" type="button">💡 ヒント <span id="hintNo">1/3</span></button>
+          </div>
+          <p id="naviMsg">ブロックを タップして めいれいを つくろう！</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="pal-title">めいれい ブロック<br><span class="pal-note">タップで ついか（ドラッグは いらないよ）</span></div>
+      <div class="palette" id="palette"></div>
+    </section>
+
+    <section class="panel">
+      <div class="prog-head">
+        <div><b>プログラム</b><span class="count-badge" id="blkCount">0こ</span></div>
+        <div style="display:flex;gap:6px">
+          <button class="mini-btn" id="btnSpeed" type="button">🐢 ふつう</button>
+          <button class="mini-btn danger" id="btnClear" type="button">ぜんぶけす</button>
+        </div>
+      </div>
+      <div class="confirmbar hidden" id="clearBar">
+        <span>ほんとうに ぜんぶ けす？</span>
+        <span><button id="clearYes" style="background:#E11D48;color:#fff">けす</button> <button id="clearNo" style="background:#fff;color:#475569">やめる</button></span>
+      </div>
+      <div id="progList"></div>
+      <div class="controls">
+        <button class="runbtn" id="btnRun" type="button">▶ じっこう</button>
+        <button class="resetbtn" id="btnReset" type="button">↺ さいしょから</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ================= クリア＋振り返りモーダル ================= -->
+<div class="modal hidden" id="clearModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div style="font-size:12px;font-weight:900;background:#fff;display:inline-block;padding:2px 12px;border-radius:999px">🎉 ミッション クリア！</div>
+      <h3>やったね！大せいこう！</h3>
+      <p id="clearStats"></p>
+    </div>
+    <div class="modal-body">
+      <div class="evo-announce hidden" id="evoAnnounce"></div>
+      <b style="font-size:14px">ふりかえり：あてはまる ものを タップしよう（いくつでも OK）</b>
+      <div class="chips" id="chips"></div>
+      <input class="note-input" id="reflNote" type="text" placeholder="気づいたこと（じゆうに かいても いいよ）">
+      <div class="modal-actions" style="margin-top:12px">
+        <button class="btn-retry" id="btnRetry" type="button">↺ べつの やりかたで ためす</button>
+        <button class="btn-next" id="btnNext" type="button">つぎへ ▶</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+"use strict";
+/* ===== ミッション定義（Phase 1：順次処理 35問） dir:0=北 1=東 2=南 3=西。全問BFSで到達可能性を検証済み ===== */
+const MISSIONS=[
+{id:1,step:"STEP 1：めいれいを しる",title:"まっすぐ すすもう",desc:"「すすむ」を 3つ ならべて、ゴールまで すすもう。",size:5,start:{x:0,y:2,dir:1},goal:{x:3,y:2},rocks:[],stars:[],preset:null,hints:["ロボットは みぎを むいているよ。そのまま すすめるね！","ゴールまで なんマスか、ゆびで かぞえてみよう。","「まえに すすむ」を 3かい 入れて じっこうしてみよう！"]},
+{id:2,step:"STEP 1：めいれいを しる",title:"うえへ すすもう",desc:"うえに むいているよ。「すすむ」で ゴールを めざそう。",size:5,start:{x:2,y:4,dir:0},goal:{x:2,y:1},rocks:[],stars:[],preset:null,hints:["ゴールは まっすぐ うえだよ。","マスの かずを かぞえてみよう。","「まえに すすむ」を 3かいだよ。"]},
+{id:3,step:"STEP 1：めいれいを しる",title:"みぎを むいてみよう",desc:"はじめに「みぎを むく」を つかうと、ゴールに むかえるよ。",size:5,start:{x:0,y:2,dir:0},goal:{x:3,y:2},rocks:[],stars:[],preset:null,hints:["ロボットは うえを むいているけど、ゴールは みぎだよ。","はじめに「みぎを むく」を 1つ 入れよう。","みぎをむく→すすむ×3 の じゅんばんだよ。"]},
+{id:4,step:"STEP 1：めいれいを しる",title:"ひだりを むいてみよう",desc:"ゴールは ひだりがわ。「ひだりを むく」を つかおう。",size:5,start:{x:4,y:2,dir:0},goal:{x:1,y:2},rocks:[],stars:[],preset:null,hints:["ゴールは ひだりがわに あるよ。","はじめに「ひだりを むく」を つかおう。","ひだりをむく→すすむ×3 だよ。"]},
+{id:5,step:"STEP 1：めいれいを しる",title:"かどを まがろう",desc:"すすんで、まがって、また すすむ。かどの まがりかたを おぼえよう。",size:5,start:{x:1,y:3,dir:0},goal:{x:3,y:1},rocks:[],stars:[],preset:null,hints:["まず まえに 2マス すすむと、かどに つくよ。","かどでは「みぎを むく」で むきを かえよう。","まえ・まえ・みぎをむく・まえ・まえ の じゅんばんだよ。"]},
+{id:6,step:"STEP 1：めいれいを しる",title:"はんたいの かど",desc:"こんどは ひだりに まがる かどだよ。",size:5,start:{x:4,y:4,dir:0},goal:{x:1,y:1},rocks:[],stars:[],preset:null,hints:["うえに 3マス すすんだら かどだよ。","かどでは「ひだりを むく」。ゴールは ひだりがわだよ。","すすむ×3→ひだりをむく→すすむ×3 だよ。"]},
+{id:7,step:"STEP 1：めいれいを しる",title:"2回 まがろう",desc:"まがるのは 2回。どっちに まがるか かんがえよう。",size:5,start:{x:0,y:2,dir:1},goal:{x:2,y:0},rocks:[],stars:[],preset:null,hints:["さいしょは みぎへ まっすぐ 2マス。","ゴールは うえ。みぎを むいているとき、うえは どっちまがり？","すすむ×2→ひだりをむく→すすむ×2 だよ。"]},
+{id:8,step:"STEP 1：めいれいを しる",title:"くねくね すすもう",desc:"みぎ・ひだり・みぎ… くねくね みちを すすもう。",size:5,start:{x:0,y:3,dir:0},goal:{x:2,y:1},rocks:[],stars:[],preset:null,hints:["まず うえに 1マス。それから みぎへ。","まがる むきは みぎ→ひだり の じゅんばんだよ。","すすむ→みぎをむく→すすむ×2→ひだりをむく→すすむ だよ。"]},
+{id:9,step:"STEP 2：くみあわせる",title:"いわを よけよう",desc:"いわに ぶつかると すすめない。まわりみちを かんがえよう。",size:5,start:{x:0,y:3,dir:1},goal:{x:4,y:1},rocks:[{x:1,y:3},{x:3,y:3},{x:2,y:0}],stars:[],preset:null,hints:["そのまま すすむと いわに ぶつかるよ。","さいしょに「ひだりを むく」で うえを むこう。","うえに 2マス、みぎを むいて 4マス すすむと ゴールだよ。"]},
+{id:10,step:"STEP 2：くみあわせる",title:"かべの むこうの ゴール",desc:"かべが みちを ふさいでいる。うえか したを まわって ゴールしよう。",size:5,start:{x:0,y:2,dir:1},goal:{x:4,y:2},rocks:[{x:2,y:1},{x:2,y:2},{x:2,y:3}],stars:[],preset:null,hints:["かべは まんなかに あるけど、うえの うえと したの したは 通れるよ。","うえまわりは 2マス のぼってから よこへ すすむよ。","ひだりをむく→すすむ×2→みぎをむく→すすむ×4→みぎをむく→すすむ×2 だよ。したまわりでも OK。"]},
+{id:11,step:"STEP 2：くみあわせる",title:"まわりこんで ゴール",desc:"まえは いわで ふさがれている。よこから まわりこもう。",size:5,start:{x:2,y:0,dir:2},goal:{x:2,y:4},rocks:[{x:2,y:1},{x:2,y:2},{x:2,y:3}],stars:[],preset:null,hints:["まえは いわ。でも よこは あいているよ。","うえを むいているときと ちがって、したを むいているときの「ひだり」は みぎがわだよ。","ひだりをむく→すすむ→みぎをむく→すすむ×4→みぎをむく→すすむ だよ。"]},
+{id:12,step:"STEP 2：くみあわせる",title:"さがるで ひっこもう",desc:"まわりは いわだらけ。でも うしろは あいている。「さがる」を つかおう。",size:5,start:{x:2,y:2,dir:0},goal:{x:2,y:4},rocks:[{x:2,y:1},{x:1,y:2},{x:3,y:2}],stars:[{x:2,y:3}],preset:null,hints:["まえに すすむと いわに ぶつかるよ。","「うしろに さがる」は、むきを かえずに うしろへ さがる めいれいだよ。","さがる を 2かい 入れると、スターを とって ゴールできるよ。"]},
+{id:13,step:"STEP 2：くみあわせる",title:"かべの すきま",desc:"かべには はしに すきまが ある。そこを とおって ゴールしよう。",size:5,start:{x:2,y:4,dir:0},goal:{x:2,y:0},rocks:[{x:1,y:1},{x:2,y:1},{x:3,y:1},{x:1,y:3},{x:2,y:3},{x:3,y:3}],stars:[],preset:null,hints:["かべは まんなかが ふさがっているけど、はしは あいているよ。","ひだりのはしを のぼる ルートを かんがえよう。","ひだりをむく→すすむ×2→みぎをむく→すすむ×4→みぎをむく→すすむ×2 だよ。みぎのはしでも OK。"]},
+{id:14,step:"STEP 2：くみあわせる",title:"おおまわり チャレンジ",desc:"まんなかは いわの かたまり。おおまわりして ゴールしよう。",size:5,start:{x:0,y:2,dir:1},goal:{x:4,y:2},rocks:[{x:2,y:2},{x:1,y:2},{x:3,y:2},{x:2,y:1},{x:2,y:3}],stars:[],preset:null,hints:["まんなかの いわには 4つ かこまれているよ。","うえを 大まわりするか、したを 大まわりするか えらぼう。","うえまわり：ひだりをむく→すすむ→みぎをむく→すすむ×4→みぎをむく→すすむ だよ。"]},
+{id:15,step:"STEP 2：くみあわせる",title:"ながい みちのり",desc:"したに すすんで、ひだりに まがって まっすぐ。ながい みちのりだよ。",size:5,start:{x:0,y:0,dir:2},goal:{x:4,y:3},rocks:[{x:2,y:1},{x:2,y:2},{x:4,y:1},{x:4,y:2}],stars:[],preset:null,hints:["まず したへ まっすぐ 3マス。","したを むいているとき、ゴール（みぎがわ）は「ひだり」まがりだよ。","すすむ×3→ひだりをむく→すすむ×4 だよ。"]},
+{id:16,step:"STEP 2：くみあわせる",title:"みちくさ スター",desc:"スターは かいしゅう しないと クリアに ならない。みちくさして とってから ゴールしよう。",size:5,start:{x:0,y:2,dir:1},goal:{x:4,y:2},rocks:[{x:2,y:2}],stars:[{x:2,y:1}],preset:null,hints:["スターを とらずに ゴールしても クリアに ならないよ。","スターは ゴールの うえに ある。まわりこんで とろう。","すすむ→ひだりをむく→すすむ→みぎをむく→すすむ×2→みぎをむく→すすむ→ひだりをむく→すすむ だよ。"]},
+{id:17,step:"STEP 2：スターと じゅんばん",title:"スターを とってから ゴール",desc:"スターを 2つ とってから ゴールする じゅんばんを かんがえよう。",size:5,start:{x:0,y:4,dir:0},goal:{x:3,y:3},rocks:[{x:1,y:2},{x:2,y:2},{x:1,y:4}],stars:[{x:0,y:1},{x:3,y:1}],preset:null,hints:["スターを とらずに ゴールしても クリアに ならないよ。","うえに 3マスで 1つめの スターが とれるよ。","みぎを むいて 3マス、また みぎを むいて 2マスだよ。"]},
+{id:18,step:"STEP 2：スターと じゅんばん",title:"スター 3つ めぐり",desc:"スターは 3つ。どの じゅんばんで まわるのが いいかな。",size:5,start:{x:2,y:4,dir:0},goal:{x:0,y:2},rocks:[],stars:[{x:2,y:0},{x:4,y:2},{x:2,y:2}],preset:null,hints:["スターを 3つ めぐって ゴールしよう。長い プログラムに ちょうせん！","まず うえへ 4マス。とちゅうで スターが 1つ とれるよ。","てっぺんで みぎを むいて 2マス、みぎを むいて 2マス、さいごは みぎを むいて 4マスだよ。"]},
+{id:19,step:"STEP 2：スターと じゅんばん",title:"さがるで スター",desc:"まえは いわ。スターは うしろに あるよ。「さがる」で とってから ゴールへ。",size:5,start:{x:1,y:1,dir:1},goal:{x:0,y:4},rocks:[{x:2,y:1}],stars:[{x:0,y:1}],preset:null,hints:["まえに すすむと いわに ぶつかるよ。","スターは うしろ。「さがる」で とりに いこう。","さがる→みぎをむく→すすむ×3 だよ。"]},
+{id:20,step:"STEP 2：スターと じゅんばん",title:"スター たんけん",desc:"スターは 2つ、ゴールは まんなか。まんなかへは したからしか はいれないよ。",size:5,start:{x:0,y:0,dir:1},goal:{x:2,y:2},rocks:[{x:2,y:1},{x:1,y:2},{x:3,y:2}],stars:[{x:4,y:0},{x:0,y:4}],preset:null,hints:["ゴールは まんなか。まんなかへは したからしか はいれないよ。","スターは みぎうえと ひだりした。どっちから まわるか きめよう。","「さがる」を つかうと みじかく なる ルートも あるよ。いろいろ 試してみよう。"]},
+{id:21,step:"STEP 2：スターと じゅんばん",title:"めいろ チャレンジ",desc:"かべの あいだを ぬって すすむ めいろ。スターも わすれずに。",size:5,start:{x:0,y:4,dir:0},goal:{x:4,y:0},rocks:[{x:1,y:1},{x:1,y:2},{x:1,y:3},{x:3,y:1},{x:3,y:2},{x:3,y:3}],stars:[{x:2,y:4}],preset:null,hints:["かべの すきまは うえの たなと したの たなだよ。","したの スターを とってから 上へ ぬける ルートも あるよ。","うえに 4マス、みぎを むいて 4マス。シンプルな ルートも あるよ。"]},
+{id:22,step:"STEP 2：スターと じゅんばん",title:"おたから ルーム",desc:"6×6の おおきな へや。スター 2つを とって、むこうがわの ゴールへ。",size:6,start:{x:0,y:5,dir:0},goal:{x:5,y:5},rocks:[{x:2,y:2},{x:2,y:3},{x:3,y:2},{x:3,y:3}],stars:[{x:0,y:0},{x:5,y:0}],preset:null,hints:["おおきな へや。まず うえの スターを めざそう。","スターは うえの りょうはしに あるよ。","すすむ×5→みぎをむく→すすむ×5→みぎをむく→すすむ×5 だよ。"]},
+{id:23,step:"STEP 2：スターと じゅんばん",title:"ダブル トンネル",desc:"かべの トンネルは 2つ。まんなかの スターも とって まっすぐ すすもう。",size:6,start:{x:0,y:3,dir:1},goal:{x:5,y:3},rocks:[{x:2,y:0},{x:2,y:1},{x:2,y:2},{x:2,y:4},{x:2,y:5},{x:4,y:0},{x:4,y:1},{x:4,y:2},{x:4,y:4},{x:4,y:5}],stars:[{x:3,y:3}],preset:null,hints:["トンネルは まんなかの たなに あるよ。","スターは トンネルの あいだに あるよ。","まっすぐ「すすむ」×5 で トンネルを ぬけられるよ。"]},
+{id:24,step:"STEP 2：スターと じゅんばん",title:"おたから めぐり",desc:"スターは かどと かど。ゴールは さいごに たどりつく かどだよ。",size:5,start:{x:4,y:4,dir:0},goal:{x:0,y:0},rocks:[{x:1,y:2},{x:2,y:2},{x:3,y:2}],stars:[{x:4,y:0},{x:0,y:4}],preset:null,hints:["スターは うえのみぎと したのひだり。ゴールは うえのひだりだよ。","ゴールに 先に つくと クリアに ならない。スターを 先に とろう。","うえの スター→もどって→したの スター→うえの ゴール、の じゅんばんだよ。"]},
+{id:25,step:"STEP 3：ふりかえり・デバッグ",title:"まちがいを なおそう 1",desc:"プログラムが もう 入っているけど、まちがっているみたい。なおしてから じっこうしよう。",size:5,start:{x:0,y:2,dir:1},goal:{x:3,y:2},rocks:[],stars:[],preset:["forward","forward","left","forward"],hints:["入っている プログラムを よく 見てみよう。","まちがいは「ひだりを むく」の ブロックだよ。","「ひだりを むく」を「まえに すすむ」に 入れかえよう。"]},
+{id:26,step:"STEP 3：ふりかえり・デバッグ",title:"まちがいを なおそう 2",desc:"まがる むきが まちがっている みたい。ブロックを 入れかえて なおそう。",size:5,start:{x:1,y:3,dir:0},goal:{x:3,y:1},rocks:[],stars:[],preset:["forward","forward","left","forward","forward"],hints:["かどで まがる むきが ちがう みたい。","まちがいは 3つめの ブロックだよ。","「ひだりを むく」を「みぎを むく」に 入れかえよう。"]},
+{id:27,step:"STEP 3：ふりかえり・デバッグ",title:"たりない めいれい",desc:"プログラムが とちゅうで 終わっている。たりない めいれいを たして 完成させよう。",size:5,start:{x:0,y:4,dir:0},goal:{x:3,y:1},rocks:[{x:1,y:2},{x:2,y:2}],stars:[{x:0,y:1}],preset:["forward","forward","forward"],hints:["スターは とれているけど、ゴールまで とどいていないね。","プログラムの つづきを 自分で たそう。","スターのあと：みぎをむく→すすむ×3→みぎをむく→すすむ×2 だよ。"]},
+{id:28,step:"STEP 3：ふりかえり・デバッグ",title:"みじかく できるかな",desc:"この プログラムでも ゴールできるけど、もっと みじかく できる。ブロックを へらして なおそう。",size:5,start:{x:0,y:2,dir:1},goal:{x:4,y:2},rocks:[],stars:[],preset:["left","forward","right","forward","forward","forward","forward","right","forward"],hints:["まず そのまま じっこうして、どんな みちを 通るか 見てみよう。","ゴールは まっすぐ みぎ。まわりみちは いらないよ。","「まえに すすむ」×4 だけで ゴールできるよ。"]},
+{id:29,step:"STEP 3：ふりかえり・デバッグ",title:"くりかえしに 気づこう",desc:"おなじ めいれいが 5つも ならんでいるね。Phase 2では「くりかえし」で みじかく かけるように なるよ。まずは そのまま じっこうして スターを とろう。",size:6,start:{x:0,y:3,dir:1},goal:{x:5,y:3},rocks:[],stars:[{x:3,y:3}],preset:["forward","forward","forward","forward","forward"],hints:["おなじ ブロックが 5つ。まずは そのまま じっこうしてみよう。","とちゅうで スターも とれるよ。","Phase 2では「くりかえし」ブロックで、この 5つを みじかく かけるように なるよ。"]},
+{id:30,step:"STEP 3：ふりかえり・デバッグ",title:"デバッグ チャレンジ",desc:"かべに ぶつかる プログラムに なっている。どこが まちがいか 見つけて なおそう。",size:5,start:{x:0,y:4,dir:0},goal:{x:4,y:0},rocks:[{x:1,y:1},{x:1,y:2},{x:1,y:3}],stars:[],preset:["forward","forward","forward","right","forward","forward"],hints:["ぶつかる ところまで じっこうして、どこで 止まるか 見てみよう。","まちがいは「すすむ」の かいすう。かどの 手前で まがっているよ。","すすむ×4→みぎをむく→すすむ×4 が ただしい かいすうだよ。"]},
+{id:31,step:"STEP 4：チャレンジ",title:"おおきな めいろ",desc:"6×6の めいろ。かべの すきまは うえと したに あるよ。",size:6,start:{x:0,y:5,dir:0},goal:{x:5,y:0},rocks:[{x:1,y:1},{x:1,y:2},{x:1,y:3},{x:1,y:4},{x:3,y:1},{x:3,y:2},{x:3,y:3},{x:3,y:4}],stars:[],preset:null,hints:["かべは 2まい。すきまは うえと しただよ。","うえの すきまを 通る ルートが みじかいよ。","すすむ×5→みぎをむく→すすむ×5 だよ。"]},
+{id:32,step:"STEP 4：チャレンジ",title:"スター コンプリート",desc:"スターは 3つの かどに ある。ぜんぶ まわってから ゴールの かどへ。",size:5,start:{x:2,y:4,dir:0},goal:{x:4,y:4},rocks:[],stars:[{x:0,y:4},{x:0,y:0},{x:4,y:0}],preset:null,hints:["スターは 3つの かど。ゴールは のこりの かどだよ。","外まわりを ぐるっと 1しゅう する つもりで かんがえよう。","ひだりをむく→すすむ×2→みぎをむく→すすむ×4→みぎをむく→すすむ×4→みぎをむく→すすむ×4 だよ。"]},
+{id:33,step:"STEP 4：チャレンジ",title:"かべだらけの へや",desc:"いわが いっぱい。とおれる みちは したの ルートだけ。",size:5,start:{x:0,y:2,dir:1},goal:{x:4,y:2},rocks:[{x:1,y:0},{x:1,y:2},{x:1,y:4},{x:3,y:0},{x:3,y:2},{x:3,y:4},{x:2,y:1}],stars:[],preset:null,hints:["うえの みちは いわで ふさがれているよ。","とおれるのは したの ルートだけ。","みぎをむく→すすむ→ひだりをむく→すすむ×4→ひだりをむく→すすむ だよ。"]},
+{id:34,step:"STEP 4：チャレンジ",title:"さがるの たつじん",desc:"「さがる」を つかいこなそう。スターを とって ゴールへ むかおう。",size:5,start:{x:2,y:2,dir:1},goal:{x:0,y:4},rocks:[{x:3,y:2},{x:2,y:1},{x:2,y:3}],stars:[{x:1,y:2}],preset:null,hints:["まわりは いわ。あいているのは うしろだけ。","スターは うしろの みちに あるよ。","さがる×2→みぎをむく→すすむ×2 だよ。"]},
+{id:35,step:"STEP 4：チャレンジ",title:"さいごの チャレンジ",desc:"スター 2つと ゴール、ぜんぶ めぐる さいごの チャレンジ。じゅんばんが 大事だよ。",size:5,start:{x:0,y:4,dir:1},goal:{x:4,y:0},rocks:[{x:1,y:2},{x:2,y:2},{x:3,y:2}],stars:[{x:4,y:4},{x:0,y:0}],preset:null,hints:["スターは みぎしたと ひだりうえ。ゴールは みぎうえだよ。","ゴールに 先に つくと クリアに ならない。じゅんばんが 大事。","うえの スター→もどって→みぎの スター→うえの ゴール、が おすすめの じゅんばんだよ。"]}
+];
+const BLOCKS=[
+{type:"forward",label:"まえに すすむ",desc:"1マス まえへ",icon:"↑",cls:"b-forward"},
+{type:"back",label:"うしろに さがる",desc:"むきは そのまま 1マス うしろへ",icon:"↓",cls:"b-back"},
+{type:"right",label:"みぎを むく",desc:"そのばで みぎへ 90°",icon:"↻",cls:"b-right"},
+{type:"left",label:"ひだりを むく",desc:"そのばで ひだりへ 90°",icon:"↺",cls:"b-left"}];
+const META={}; BLOCKS.forEach(b=>META[b.type]=b);
+const GUIDES=[{name:"そら",color:"#38BDF8"},{name:"りく",color:"#4ADE80"},{name:"かい",color:"#A78BFA"},{name:"さく",color:"#F9A8D4"},{name:"つき",color:"#FCD34D"},{name:"なみ",color:"#60A5FA"}];
+/* ===== パートナー（ナビアン）育成：カタログの実在3体から選択・3段階進化 =====
+   画像は NAVI CHARACTER カタログ（displayNamesJa）の正式名と実在パスを使用。
+   パス形式: assets/web/fantasy/monsters/{zako|zako-evolved|zako-lastevo}/{id}.webp（公開版で全9点 200確認済み） */
+const NAVI_BASE="https://tt-sensei.github.io/navi-character-/assets/web/fantasy/monsters/";
+const PARTNERS=[
+ {id:"purun-little-magic-slime",names:["ぷるんスライム","ぷるんスライム・エボル","ぷるんスライム・ラスエボ"]},
+ {id:"sakura-snow-puff",names:["さくらスノーパフ","さくらスノーパフ・エボル","さくらスノーパフ・ラスエボ"]},
+ {id:"mofu-wolf-frost-pup",names:["もふウルフ","もふウルフ・エボル","もふウルフ・ラスエボ"]}];
+function partnerImg(partnerId,stage){
+ if(stage===2)return NAVI_BASE+"zako-evolved/"+partnerId+"-evolved.webp";
+ if(stage===3)return NAVI_BASE+"zako-lastevo/"+partnerId+"-lastevo.webp";
+ return NAVI_BASE+"zako/"+partnerId+".webp"}
+function partner(){return PARTNERS.find(x=>x.id===save.partner)||PARTNERS[0]}
+const STAGES=[{at:0},{at:40},{at:100}];
+function stageOf(xp){let st=1;STAGES.forEach((s2,i)=>{if(xp>=s2.at)st=i+1});return st}
+function curXp(){return (save.xpBy&&save.xpBy[partner().id])||0}
+/* ===== 効果音（Web Audio・外部ファイルなし） ===== */
+const Snd={on:true,ctx:null,tone(f,d,type,g,delay){if(!this.on)return;try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;if(!this.ctx)this.ctx=new C();if(this.ctx.state==="suspended")this.ctx.resume();const t=this.ctx.currentTime+(delay||0),o=this.ctx.createOscillator(),gn=this.ctx.createGain();o.type=type||"sine";o.frequency.setValueAtTime(f,t);gn.gain.setValueAtTime(g||.1,t);gn.gain.exponentialRampToValueAtTime(.001,t+(d||.12));o.connect(gn);gn.connect(this.ctx.destination);o.start(t);o.stop(t+(d||.12))}catch(e){}},
+tap(){this.tone(520,.08,"triangle",.1)},del(){this.tone(300,.09,"sine",.09)},step(){this.tone(440,.09,"sine",.09)},turn(){this.tone(587,.09,"triangle",.09)},
+star(){this.tone(784,.12,"sine",.12);this.tone(1047,.2,"sine",.12,.09)},
+bump(){this.tone(170,.16,"sawtooth",.1);this.tone(130,.2,"sawtooth",.1,.1)},
+clear(){[523,659,784,1047].forEach((f,i)=>this.tone(f,.22,"triangle",.12,i*.1))}};
+/* ===== 状態と保存 ===== */
+const KEY="codeQuest.v2";
+let save={cleared:[],reflections:{},xp:0,sound:true,partner:"purun-little-magic-slime",xpBy:{}};
+try{const r=localStorage.getItem(KEY);if(r){const p=JSON.parse(r);if(p&&typeof p==="object")save=Object.assign(save,p)}}catch(e){}
+if(!save.xpBy)save.xpBy={};
+if(save.xp&&!Object.keys(save.xpBy).length)save.xpBy[save.partner||"purun-little-magic-slime"]=save.xp;
+if(!PARTNERS.some(x=>x.id===save.partner))save.partner="purun-little-magic-slime";
+Snd.on=save.sound!==false;
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(save))}catch(e){}}
+let cur=1,program=[],guide=GUIDES[0],hintIdx=0,fast=false,collected=[],selId=null;
+let exec={status:"idle",queue:[],ptr:0,timer:null,activeId:null};
+let robot={x:0,y:0,dir:1,angle:90};
+let uid=0; const nid=()=>"b"+(++uid);
+const $=id=>document.getElementById(id);
+function mission(){return MISSIONS.find(m=>m.id===cur)||MISSIONS[0]}
+function setMsg(t,mood){$("naviMsg").textContent=t;const b=$("naviBubble");b.className="navi-bubble"+(mood==="warn"?" warn":mood==="hint"?" hintbg":"")}
+/* ===== トップ画面 ===== */
+function renderTop(){
+ const pt=partner(),xp=curXp(),st=stageOf(xp);
+ $("partnerArt").innerHTML='<img class="partner-img" src="'+partnerImg(pt.id,st)+'" alt="'+pt.names[st-1]+'">';
+ $("partnerName").textContent=pt.names[st-1];
+ $("partnerStage").textContent="ステージ "+st+"："+pt.names[st-1];
+ $("xpText").textContent=xp+" XP";
+ const next=STAGES[st];
+ let pct,nextTxt;
+ if(next){const prevAt=STAGES[st-1].at;pct=Math.round((xp-prevAt)/(next.at-prevAt)*100);nextTxt="つぎの しんかまで あと "+(next.at-xp)+" XP"}
+ else{pct=100;nextTxt="さいごまで そだったよ！"}
+ $("xpFill").style.width=pct+"%"; $("xpNext").textContent=nextTxt;
+ $("clearCount").textContent="クリア "+save.cleared.length+"/"+MISSIONS.length;
+ $("evoRoad").innerHTML=STAGES.map((s2,i)=>'<div class="evo-step'+(st===i+1?" now":"")+'"><img src="'+partnerImg(pt.id,i+1)+'" alt="'+pt.names[i]+'"><br>'+(i+1)+". "+["","エボル","ラスエボ"][i]+"</div>").join('<div class="evo-arrow">▶</div>');
+ const pc=$("partnerChoices");pc.innerHTML="";
+ PARTNERS.forEach(x=>{const pxp=(save.xpBy&&save.xpBy[x.id])||0,pst=stageOf(pxp);
+  const b=document.createElement("button");b.type="button";b.className="pchoice"+(x.id===pt.id?" sel":"");
+  b.innerHTML='<img src="'+partnerImg(x.id,pst)+'" alt="'+x.names[pst-1]+'"><span class="pn">'+x.names[0]+'</span><span class="px">'+pxp+' XP・ステージ'+pst+"</span>";
+  b.addEventListener("click",()=>{if(save.partner!==x.id){save.partner=x.id;persist();Snd.tap();renderTop()}});
+  pc.appendChild(b)});
+ const g=$("missionGrid");g.innerHTML="";
+ MISSIONS.forEach(m=>{const done=save.cleared.includes(m.id);
+  const b=document.createElement("button");b.type="button";b.className="mcard"+(done?" cleared":"");
+  b.innerHTML='<span class="num">ミッション '+m.id+"</span><span class='ttl'>"+m.title+'</span><span class="step">'+m.step+'</span><span class="stat '+(done?"":"yet")+'">'+(done?"★ クリアずみ":"まだ ちょうせん していない")+"</span>";
+  b.addEventListener("click",()=>{Snd.tap();openMission(m.id)});g.appendChild(b)});
+}
+/* ===== プログラム画面 ===== */
+function buildPalette(){
+ const p=$("palette");p.innerHTML="";
+ BLOCKS.forEach(b=>{const btn=document.createElement("button");btn.type="button";btn.className="pbtn "+b.cls;
+  btn.innerHTML='<span class="ic">'+b.icon+'</span><span><span class="lb">'+b.label+'</span><br><span class="ds">'+b.desc+"</span></span>";
+  btn.addEventListener("click",()=>addBlock(b.type));p.appendChild(btn)});
+ const note=document.createElement("p");note.className="pal-note";note.textContent="プログラムは 上から じゅんばんに うごくよ。ならびかえは ↑↓、けすときは × を つかってね。";p.appendChild(note);
+}
+function openMission(id){
+ cur=id;program=(mission().preset||[]).map(t=>({id:nid(),type:t}));selId=null;hintIdx=0;guide=GUIDES[Math.floor(Math.random()*GUIDES.length)];
+ $("guideName").textContent="ガイド："+guide.name;
+ $("guideFace").innerHTML='<svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="17" fill="'+guide.color+'"/><circle cx="14" cy="18" r="2.4" fill="#0F172A"/><circle cx="26" cy="18" r="2.4" fill="#0F172A"/><path d="M14 25 Q20 29 26 25" stroke="#0F172A" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>';
+ const m=mission();$("mStep").textContent=m.step;$("mTitle").textContent="ミッション "+m.id+"："+m.title;$("mGoal").textContent=m.desc;
+ $("hintNo").textContent="1/"+m.hints.length;
+ $("screenTop").classList.add("hidden");$("screenPlay").classList.remove("hidden");$("btnBackTop").classList.remove("hidden");
+ resetStage();renderProgram();
+}
+function goTop(){stopTimer();exec.status="idle";updateRunBtn();$("screenPlay").classList.add("hidden");$("screenTop").classList.remove("hidden");$("btnBackTop").classList.add("hidden");renderTop()}
+function resetStage(){
+ stopTimer();exec={status:"idle",queue:[],ptr:0,timer:null,activeId:null};
+ const m=mission();robot={x:m.start.x,y:m.start.y,dir:m.start.dir,angle:m.start.dir*90};collected=[];
+ renderField();updateRobot();updateRunBtn();setMsg("ブロックを タップして めいれいを つくろう！");
+}
+function renderField(){
+ const m=mission(),n=m.size,box=$("gridBox");
+ const avail=Math.min(window.innerHeight-330,430);const side=Math.max(280,Math.min(430,avail));
+ box.style.width=side+"px";box.style.height=side+"px";
+ const cells=$("cells");cells.style.gridTemplateColumns="repeat("+n+",1fr)";cells.style.gridTemplateRows="repeat("+n+",1fr)";cells.innerHTML="";
+ for(let y=0;y<n;y++)for(let x=0;x<n;x++){const d=document.createElement("div");d.className="cell"+((x+y)%2?" alt":"");cells.appendChild(d)}
+ renderObjects();
+ const r=$("robot");r.style.width=(100/n)+"%";r.style.height=(100/n)+"%";r.style.left="8px";r.style.top="8px";
+ r.style.width="calc("+(100/n)+"% - 5px)";r.style.height="calc("+(100/n)+"% - 5px)";
+ $("robotBody").innerHTML=robotSVG();
+}
+function robotSVG(){
+ return '<svg viewBox="0 0 80 80" width="92%" height="92%"><polygon points="40,1 31,13 49,13" fill="#F59E0B" stroke="#fff" stroke-width="1.5"/><rect x="18" y="17" width="44" height="48" rx="14" fill="#2563EB" stroke="#1D4ED8" stroke-width="3"/><rect x="22" y="20" width="36" height="16" rx="8" fill="#0F172A"/><circle cx="32" cy="28" r="4" fill="#38BDF8"/><circle cx="48" cy="28" r="4" fill="#38BDF8"/><ellipse cx="40" cy="52" rx="12" ry="8" fill="#93C5FD" opacity=".7"/></svg>';
+}
+function cellPos(x,y,n){return 'left:calc(8px + '+(x*(100/n))+'% );top:calc(8px + '+(y*(100/n))+'% );width:calc('+(100/n)+'% - 5px);height:calc('+(100/n)+'% - 5px)'}
+function renderObjects(){
+ const m=mission(),n=m.size,o=$("objects");o.innerHTML="";o.style.position="absolute";o.style.inset="0";
+ const add=(x,y,cls,txt)=>{const d=document.createElement("div");d.className="obj";d.setAttribute("style",cellPos(x,y,n));d.innerHTML='<div class="inner '+cls+'">'+txt+"</div>";o.appendChild(d)};
+ add(m.start.x,m.start.y,"start-inner","START");
+ add(m.goal.x,m.goal.y,"goal-inner","🚩");
+ m.rocks.forEach(r=>add(r.x,r.y,"rock-inner","🪨"));
+ m.stars.forEach(s=>{if(!collected.includes(s.x+","+s.y))add(s.x,s.y,"star-inner","⭐")});
+ if(m.stars.length){$("starBadge").classList.remove("hidden");$("starNow").textContent=collected.length;$("starAll").textContent=m.stars.length}else{$("starBadge").classList.add("hidden")}
+}
+function updateRobot(){const n=mission().size;$("robot").style.transform="translate("+(robot.x*100)+"%, "+(robot.y*100)+"%)";$("robotBody").style.transform="rotate("+robot.angle+"deg)"}
+/* ===== プログラム編集（タップのみ） ===== */
+function addBlock(type){if(exec.status==="running")return;Snd.tap();const nb={id:nid(),type};const ix=program.findIndex(b=>b.id===selId);if(ix>=0)program.splice(ix+1,0,nb);else program.push(nb);selId=nb.id;renderProgram();
+ const l=$("progList");l.scrollTop=l.scrollHeight}
+function renderProgram(){
+ $("blkCount").textContent=program.length+"こ";
+ const l=$("progList");l.innerHTML="";
+ if(!program.length){l.innerHTML='<div class="empty">ここに めいれいが ならぶよ<br>まんなかの ブロックを タップしてね</div>';return}
+ program.forEach((b,i)=>{const meta=META[b.type];const row=document.createElement("div");row.className="blk "+meta.cls+(exec.activeId===b.id?" exec":"")+(selId===b.id?" sel":"");row.id="dom_"+b.id;
+  row.innerHTML='<span class="left"><span class="no">'+(i+1)+'</span><span style="font-weight:900">'+meta.icon+'</span><span class="lb">'+meta.label+'</span></span><span class="ops"><button data-a="up" title="うえへ">↑</button><button data-a="down" title="したへ">↓</button><button data-a="del" title="けす">×</button></span>';
+  row.querySelector('[data-a="up"]').addEventListener("click",()=>move(i,-1));
+  row.querySelector('[data-a="down"]').addEventListener("click",()=>move(i,1));
+  row.querySelector('[data-a="del"]').addEventListener("click",()=>{if(exec.status==="running")return;Snd.del();if(selId===b.id)selId=null;program.splice(i,1);renderProgram()});
+  row.addEventListener("click",e=>{if(e.target.closest(".ops"))return;selId=b.id;renderProgram()});
+  l.appendChild(row)});
+}
+function move(i,d){if(exec.status==="running")return;const j=i+d;if(j<0||j>=program.length)return;Snd.tap();const t=program[i];program[i]=program[j];program[j]=t;renderProgram()}
+/* ===== 実行エンジン（ASTを1命令ずつ解釈・eval不使用） ===== */
+function stopTimer(){if(exec.timer){clearTimeout(exec.timer);exec.timer=null}}
+function updateRunBtn(){const b=$("btnRun");
+ if(exec.status==="running"){b.textContent="⏸ いちじていし";b.className="runbtn pause"}
+ else if(exec.status==="paused"){b.textContent="▶ さいかい";b.className="runbtn resume"}
+ else{b.textContent="▶ じっこう";b.className="runbtn"}}
+function runOrPause(){
+ if(exec.status==="running"){stopTimer();exec.status="paused";updateRunBtn();setMsg("いちじていし 中。「▶ さいかい」で つづきから うごくよ。");return}
+ if(exec.status==="paused"){exec.status="running";updateRunBtn();schedule();return}
+ if(!program.length){Snd.bump();setMsg("まだ めいれいが ないよ。ブロックを タップしてね。","warn");return}
+ const keep=program.slice();resetStage();program=keep;
+ exec.queue=program.map(b=>({id:b.id,type:b.type}));exec.ptr=0;exec.status="running";updateRunBtn();
+ setMsg("しゅっぱつ！うごきを よく 見てみよう。");schedule(200);
+}
+function schedule(ms){stopTimer();exec.timer=setTimeout(step,ms||(fast?280:580))}
+function step(){
+ if(exec.status!=="running")return;
+ if(exec.ptr>=exec.queue.length){exec.status="idle";exec.activeId=null;updateRunBtn();renderProgram();Snd.bump();setMsg("さいごまで うごいたよ。ゴールまで あと どれくらいか 見てみよう。","hint");return}
+ const s=exec.queue[exec.ptr++];exec.activeId=s.id;renderProgram();
+ const m=mission(),DX=[0,1,0,-1],DY=[-1,0,1,0];
+ if(s.type==="forward"||s.type==="back"){const sign=s.type==="forward"?1:-1;
+  const nx=robot.x+DX[robot.dir]*sign,ny=robot.y+DY[robot.dir]*sign;
+  if(nx<0||nx>=m.size||ny<0||ny>=m.size){collide("おっと！そとには すすめないよ。むきや かいすうを 見なおしてみよう。");return}
+  if(m.rocks.some(r=>r.x===nx&&r.y===ny)){collide("おっと！いわに ぶつかったよ。どの めいれいで ぶつかったか かくにんしてみよう。");return}
+  Snd.step();robot.x=nx;robot.y=ny;updateRobot();
+  const k=nx+","+ny;
+  if(m.stars.some(st=>st.x===nx&&st.y===ny)&&!collected.includes(k)){collected.push(k);Snd.star();renderObjects();setMsg("キラッ！スターを ゲット！")}
+  if(nx===m.goal.x&&ny===m.goal.y){
+   if(collected.length<m.stars.length){exec.status="idle";updateRunBtn();Snd.bump();setMsg("ゴールに ついたけど、スターが まだ あるよ。ぜんぶ あつめよう！","warn");return}
+   onClear();return}
+ }else if(s.type==="right"){Snd.turn();robot.dir=(robot.dir+1)%4;robot.angle+=90;updateRobot()}
+ else if(s.type==="left"){Snd.turn();robot.dir=(robot.dir+3)%4;robot.angle-=90;updateRobot()}
+ schedule();
+}
+function collide(msg){stopTimer();exec.status="idle";updateRunBtn();Snd.bump();const r=$("robot");r.classList.remove("bump");void r.offsetWidth;r.classList.add("bump");setMsg(msg,"warn");renderProgram()}
+function onClear(){
+ stopTimer();exec.status="idle";exec.activeId=null;updateRunBtn();renderProgram();Snd.clear();
+ const m=mission(),first=!save.cleared.includes(m.id);
+ if(first)save.cleared.push(m.id);
+ const gain=first?20:5,pt=partner(),before=stageOf(curXp());save.xpBy[pt.id]=curXp()+gain;const after=stageOf(curXp());persist();
+ $("clearStats").textContent=m.title+"｜つかった めいれい "+program.length+"こ｜+"+gain+" XP ゲット！";
+ const evo=$("evoAnnounce");
+ if(after>before){evo.classList.remove("hidden");evo.innerHTML="✨ しんか！ パートナーが「"+pt.names[after-1]+"」に そだったよ！<br><img src=\""+partnerImg(pt.id,after)+"\" alt=\""+pt.names[after-1]+"\" style=\"width:76px;height:76px;object-fit:contain\">"}
+ else evo.classList.add("hidden");
+ buildChips();$("reflNote").value=(save.reflections[m.id]&&save.reflections[m.id].note)||"";
+ setMsg("やったね！ゴール とうたつ！");
+ setTimeout(()=>$("clearModal").classList.remove("hidden"),500);
+}
+/* ===== 振り返り ===== */
+const CHIP_LABELS=["じゅんばんを くふうした","まちがいを なおせた","うごきを そうぞうできた","あきらめずに ちょうせんした"];
+function buildChips(){const prev=(save.reflections[cur]&&save.reflections[cur].chips)||[];const c=$("chips");c.innerHTML="";
+ CHIP_LABELS.forEach(lb=>{const b=document.createElement("button");b.type="button";b.className="chip"+(prev.includes(lb)?" on":"");b.textContent=(prev.includes(lb)?"✓ ":"")+lb;
+  b.addEventListener("click",()=>{Snd.tap();b.classList.toggle("on");b.textContent=(b.classList.contains("on")?"✓ ":"")+lb});c.appendChild(b)})}
+function saveReflection(){const chips=[];document.querySelectorAll("#chips .chip.on").forEach(el=>chips.push(el.textContent.replace("✓ ","")));
+ save.reflections[cur]={chips,note:$("reflNote").value.trim()};persist()}
+/* ===== イベント ===== */
+$("btnBackTop").addEventListener("click",()=>{Snd.tap();goTop()});
+$("btnSound").addEventListener("click",()=>{Snd.on=!Snd.on;save.sound=Snd.on;persist();$("btnSound").textContent=Snd.on?"🔊 おと ON":"🔇 おと OFF";if(Snd.on)Snd.tap()});
+$("btnRun").addEventListener("click",runOrPause);
+$("btnReset").addEventListener("click",()=>{Snd.tap();const keep=program.slice();resetStage();program=keep;renderProgram()});
+$("btnSpeed").addEventListener("click",()=>{Snd.tap();fast=!fast;$("btnSpeed").textContent=fast?"🐇 はやい":"🐢 ふつう"});
+$("btnClear").addEventListener("click",()=>{if(!program.length||exec.status==="running")return;$("clearBar").classList.remove("hidden")});
+$("clearNo").addEventListener("click",()=>$("clearBar").classList.add("hidden"));
+$("clearYes").addEventListener("click",()=>{Snd.del();const m=mission();program=m.preset?m.preset.map(t=>({id:nid(),type:t})):[];$("clearBar").classList.add("hidden");renderProgram()});
+$("btnHint").addEventListener("click",()=>{Snd.tap();const m=mission();setMsg("💡 ヒント："+m.hints[hintIdx%m.hints.length],"hint");hintIdx++;$("hintNo").textContent=((hintIdx%m.hints.length)+1)+"/"+m.hints.length});
+$("btnRetry").addEventListener("click",()=>{Snd.tap();saveReflection();$("clearModal").classList.add("hidden");const keep=program.slice();resetStage();program=keep;renderProgram()});
+$("btnNext").addEventListener("click",()=>{Snd.tap();saveReflection();$("clearModal").classList.add("hidden");if(cur<MISSIONS.length)openMission(cur+1);else goTop()});
+window.addEventListener("resize",()=>{if(!$("screenPlay").classList.contains("hidden"))renderField()});
+/* ===== 初期化 ===== */
+$("btnSound").textContent=Snd.on?"🔊 おと ON":"🔇 おと OFF";
+buildPalette();renderTop();
+</script>
+</body>
+</html>

@@ -35,6 +35,21 @@ main{max-width:1180px;margin:0 auto;padding:12px 14px}
 .evo-step{text-align:center;font-size:10px;font-weight:800;color:#94A3B8;width:33%}
 .evo-step.now{color:#B45309}
 .evo-arrow{color:#CBD5E1;font-weight:900}
+.rec-list{display:flex;flex-direction:column;gap:10px;max-height:520px;overflow-y:auto;padding-right:4px;scrollbar-width:thin}
+.rec-card{background:#fff;border:2px solid #E2E8F0;border-radius:16px;padding:12px 14px}
+.rec-card h4{margin:0 0 4px;font-size:14.5px}
+.rec-card .meta{font-size:11px;font-weight:800;color:#94A3B8;margin-bottom:6px}
+.rtag{display:inline-block;background:#EFF6FF;color:#1D4ED8;border:1.5px solid #BFDBFE;font-size:11px;font-weight:800;border-radius:999px;padding:2px 9px;margin:0 5px 5px 0}
+.rec-note{background:#FFFBEB;border:1.5px dashed #FCD34D;border-radius:10px;padding:7px 10px;font-size:12.5px;font-weight:700;margin-top:2px;white-space:pre-wrap}
+.rec-prog{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px;align-items:center}
+.rec-prog .pl{font-size:10.5px;font-weight:900;color:#64748B;margin-right:3px}
+.pmini{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;color:#fff;font-size:13px;font-weight:900}
+.rec-again{margin-top:8px;background:#2563EB;color:#fff;border:none;border-radius:10px;padding:7px 14px;font-weight:900;font-size:12px;cursor:pointer}
+.rec-sum{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.rec-sum .box{flex:1;min-width:150px;background:#fff;border:2px solid #E2E8F0;border-radius:16px;padding:10px 14px;text-align:center}
+.rec-sum .box b{display:block;font-size:21px;color:#1D4ED8}
+.rec-sum .box span{font-size:11px;font-weight:800;color:#64748B}
+.chip-count{display:inline-block;background:#F0FDF4;border:1.5px solid #BBF7D0;color:#15803D;font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 10px;margin:0 5px 5px 0}
 .pchoices{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
 .pchoice{border:2px solid #E2E8F0;background:#fff;border-radius:16px;padding:7px 4px 6px;cursor:pointer;text-align:center;transition:transform .1s,border-color .1s}
 .pchoice:active{transform:scale(.96)}
@@ -163,6 +178,7 @@ main{max-width:1180px;margin:0 auto;padding:12px 14px}
   </div>
   <div style="display:flex;gap:8px;align-items:center">
     <button class="hbtn hidden" id="btnBackTop" type="button">← ミッションいちらん</button>
+    <button class="hbtn" id="btnRecords" type="button">📖 学びの きろく</button>
     <button class="hbtn" id="btnSound" type="button">🔊 おと ON</button>
   </div>
 </header>
@@ -245,6 +261,18 @@ main{max-width:1180px;margin:0 auto;padding:12px 14px}
       </div>
     </section>
   </div>
+</main>
+<!-- ================= 学びのきろく画面 ================= -->
+<main id="screenRecords" class="hidden" style="padding-top:10px">
+  <section class="panel" style="max-width:1060px;margin:0 auto">
+    <div class="panel-head">
+      <div class="mtitle" style="font-size:19px">📖 学びの きろく</div>
+      <p class="mgoal">クリアした ミッションの ふりかえりと、つかった プログラムを 見かえせるよ。</p>
+    </div>
+    <div class="rec-sum" id="recSum"></div>
+    <div id="recChips" style="margin-bottom:10px"></div>
+    <div class="rec-list" id="recList"></div>
+  </section>
 </main>
 
 <!-- ================= クリア＋振り返りモーダル ================= -->
@@ -340,9 +368,10 @@ bump(){this.tone(170,.16,"sawtooth",.1);this.tone(130,.2,"sawtooth",.1,.1)},
 clear(){[523,659,784,1047].forEach((f,i)=>this.tone(f,.22,"triangle",.12,i*.1))}};
 /* ===== 状態と保存 ===== */
 const KEY="codeQuest.v2";
-let save={cleared:[],reflections:{},xp:0,sound:true,partner:"purun-little-magic-slime",xpBy:{}};
+let save={cleared:[],reflections:{},programs:{},xp:0,sound:true,partner:"purun-little-magic-slime",xpBy:{}};
 try{const r=localStorage.getItem(KEY);if(r){const p=JSON.parse(r);if(p&&typeof p==="object")save=Object.assign(save,p)}}catch(e){}
 if(!save.xpBy)save.xpBy={};
+if(!save.programs)save.programs={};
 if(save.xp&&!Object.keys(save.xpBy).length)save.xpBy[save.partner||"purun-little-magic-slime"]=save.xp;
 if(!PARTNERS.some(x=>x.id===save.partner))save.partner="purun-little-magic-slime";
 Snd.on=save.sound!==false;
@@ -395,10 +424,34 @@ function openMission(id){
  $("guideFace").innerHTML='<svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="17" fill="'+guide.color+'"/><circle cx="14" cy="18" r="2.4" fill="#0F172A"/><circle cx="26" cy="18" r="2.4" fill="#0F172A"/><path d="M14 25 Q20 29 26 25" stroke="#0F172A" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>';
  const m=mission();$("mStep").textContent=m.step+"｜"+gradeOf(m.id);$("mTitle").textContent="ミッション "+m.id+"："+m.title;$("mGoal").textContent=m.desc;
  $("hintNo").textContent="1/"+m.hints.length;
- $("screenTop").classList.add("hidden");$("screenPlay").classList.remove("hidden");$("btnBackTop").classList.remove("hidden");
+ $("screenTop").classList.add("hidden");$("screenRecords").classList.add("hidden");$("screenPlay").classList.remove("hidden");$("btnBackTop").classList.remove("hidden");$("btnRecords").classList.add("hidden");
  resetStage();renderProgram();
 }
-function goTop(){stopTimer();exec.status="idle";updateRunBtn();$("screenPlay").classList.add("hidden");$("screenTop").classList.remove("hidden");$("btnBackTop").classList.add("hidden");renderTop()}
+function goTop(){stopTimer();exec.status="idle";updateRunBtn();$("screenPlay").classList.add("hidden");$("screenRecords").classList.add("hidden");$("screenTop").classList.remove("hidden");$("btnBackTop").classList.add("hidden");$("btnRecords").classList.remove("hidden");renderTop()}
+function openRecords(){Snd.tap();$("screenTop").classList.add("hidden");$("screenPlay").classList.add("hidden");$("screenRecords").classList.remove("hidden");$("btnBackTop").classList.remove("hidden");$("btnRecords").classList.add("hidden");renderRecords()}
+function renderRecords(){
+ const pt=partner(),cleared=MISSIONS.filter(m=>save.cleared.includes(m.id));
+ const reflCount=cleared.filter(m=>save.reflections[m.id]&&((save.reflections[m.id].chips||[]).length||save.reflections[m.id].note)).length;
+ $("recSum").innerHTML='<div class="box"><b>'+cleared.length+" / "+MISSIONS.length+'</b><span>クリアした ミッション</span></div>'
+  +'<div class="box"><b>'+reflCount+' 件</b><span>ふりかえりを かいた ミッション</span></div>'
+  +'<div class="box"><b>'+pt.names[stageOf(curXp())-1]+'</b><span>いまの パートナー（ステージ '+stageOf(curXp())+"・"+curXp()+' XP）</span></div>';
+ const counts={};CHIP_LABELS.forEach(lb=>counts[lb]=0);
+ Object.values(save.reflections).forEach(r=>(r.chips||[]).forEach(c=>{if(c in counts)counts[c]++}));
+ $("recChips").innerHTML='<div style="font-size:12px;font-weight:900;color:#475569;margin-bottom:5px">あなたの ふりかえり（よく えらんだ もの）</div>'+CHIP_LABELS.map(lb=>'<span class="chip-count">'+lb+"："+counts[lb]+" 回</span>").join("");
+ const list=$("recList");list.innerHTML="";
+ if(!cleared.length){list.innerHTML='<div class="rec-card" style="text-align:center;font-weight:800;color:#94A3B8;padding:26px">まだ きろくが ないよ。ミッションを クリアすると、ここに ふりかえりが たまるよ。</div>';return}
+ cleared.forEach(m=>{const r=save.reflections[m.id]||{chips:[],note:""};const prog=save.programs[m.id]||[];
+  const card=document.createElement("div");card.className="rec-card";
+  let h='<h4>ミッション '+m.id+"："+m.title+'</h4><div class="meta">'+m.step+"｜"+gradeOf(m.id)+"</div>";
+  if((r.chips||[]).length)h+=r.chips.map(c=>'<span class="rtag">✓ '+c+"</span>").join("");
+  else h+='<span class="rtag" style="background:#F8FAFC;color:#94A3B8;border-color:#E2E8F0">ふりかえりは まだ かいて いない</span>';
+  if(r.note)h+='<div class="rec-note">✏️ '+r.note.replace(/</g,"&lt;")+"</div>";
+  if(prog.length)h+='<div class="rec-prog"><span class="pl">つかった プログラム（'+prog.length+'こ）</span>'+prog.map(t=>'<span class="pmini '+META[t].cls+'" title="'+META[t].label+'">'+META[t].icon+"</span>").join("")+"</div>";
+  h+='<br><button class="rec-again" type="button">▶ もういちど あそぶ</button>';
+  card.innerHTML=h;
+  card.querySelector(".rec-again").addEventListener("click",()=>{Snd.tap();$("screenRecords").classList.add("hidden");$("btnRecords").classList.remove("hidden");openMission(m.id)});
+  list.appendChild(card)});
+}
 function resetStage(){
  stopTimer();exec={status:"idle",queue:[],ptr:0,timer:null,activeId:null};
  const m=mission();robot={x:m.start.x,y:m.start.y,dir:m.start.dir,angle:m.start.dir*90};collected=[];
@@ -484,7 +537,7 @@ function onClear(){
  stopTimer();exec.status="idle";exec.activeId=null;updateRunBtn();renderProgram();Snd.clear();
  const m=mission(),first=!save.cleared.includes(m.id);
  if(first)save.cleared.push(m.id);
- const gain=first?20:5,pt=partner(),before=stageOf(curXp());save.xpBy[pt.id]=curXp()+gain;const after=stageOf(curXp());persist();
+ const gain=first?20:5,pt=partner(),before=stageOf(curXp());save.xpBy[pt.id]=curXp()+gain;const after=stageOf(curXp());save.programs[cur]=program.map(b=>b.type);persist();
  $("clearStats").textContent=m.title+"｜つかった めいれい "+program.length+"こ｜+"+gain+" XP ゲット！";
  const evo=$("evoAnnounce");
  if(after>before){evo.classList.remove("hidden");evo.innerHTML="✨ しんか！ パートナーが「"+pt.names[after-1]+"」に そだったよ！<br><img src=\""+partnerImg(pt.id,after)+"\" alt=\""+pt.names[after-1]+"\" style=\"width:76px;height:76px;object-fit:contain\">"}
@@ -502,6 +555,7 @@ function saveReflection(){const chips=[];document.querySelectorAll("#chips .chip
  save.reflections[cur]={chips,note:$("reflNote").value.trim()};persist()}
 /* ===== イベント ===== */
 $("btnBackTop").addEventListener("click",()=>{Snd.tap();goTop()});
+$("btnRecords").addEventListener("click",openRecords);
 $("btnSound").addEventListener("click",()=>{Snd.on=!Snd.on;save.sound=Snd.on;persist();$("btnSound").textContent=Snd.on?"🔊 おと ON":"🔇 おと OFF";if(Snd.on)Snd.tap()});
 $("btnRun").addEventListener("click",runOrPause);
 $("btnReset").addEventListener("click",()=>{Snd.tap();const keep=program.slice();resetStage();program=keep;renderProgram()});

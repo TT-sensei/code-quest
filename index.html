@@ -57,6 +57,9 @@ main{max-width:1180px;margin:0 auto;padding:12px 14px}
 .mcard.cleared .num{background:#D97706}
 .mcard .ttl{font-size:14px;font-weight:900;line-height:1.35}
 .mcard .step{font-size:10px;font-weight:800;color:var(--sub)}
+.mcard .grade{font-size:10px;font-weight:800;color:#94A3B8}
+.mcard.reco{border-color:#F59E0B;background:#FFFBEB;box-shadow:0 0 0 2px #FDE68A,0 6px 14px -6px rgba(245,158,11,.35)}
+.reco-tag{display:inline-block;background:#F59E0B;color:#fff;font-size:9.5px;font-weight:900;border-radius:999px;padding:1.5px 7px;margin-left:5px;vertical-align:2px}
 .mcard .stat{margin-top:auto;font-size:11px;font-weight:900;color:#059669}
 .mcard .stat.yet{color:#94A3B8}
 /* ---------- プログラム画面 ---------- */
@@ -182,7 +185,7 @@ main{max-width:1180px;margin:0 auto;padding:12px 14px}
     </section>
     <section class="card missions">
       <h2>ミッションを えらぼう</h2>
-      <p class="lead">STEP 1〜4：めいれいを しって、くみあわせて、なおして、ちょうせんしよう。どの ミッションからでも ちょうせんできるよ。</p>
+      <p class="lead">番号の じゅんに すすむのが おすすめ（⭐マーク）。どの ミッションからでも ちょうせんできるよ。学年は めやすだよ。</p>
       <div class="mgrid" id="missionGrid"></div>
     </section>
   </div>
@@ -324,6 +327,8 @@ function partnerImg(partnerId,stage){
  if(stage===3)return NAVI_BASE+"zako-lastevo/"+partnerId+"-lastevo.webp";
  return NAVI_BASE+"zako/"+partnerId+".webp"}
 function partner(){return PARTNERS.find(x=>x.id===save.partner)||PARTNERS[0]}
+/* 学年のめやす（ロックではなく目安表示のみ） */
+function gradeOf(id){if(id<=8)return "1〜2年生の めやす";if(id<=16)return "2〜3年生の めやす";if(id<=24)return "3〜4年生の めやす";if(id<=30)return "4〜5年生の めやす";return "5〜6年生の めやす"}
 const STAGES=[{at:0},{at:40},{at:100}];
 function stageOf(xp){let st=1;STAGES.forEach((s2,i)=>{if(xp>=s2.at)st=i+1});return st}
 function curXp(){return (save.xpBy&&save.xpBy[partner().id])||0}
@@ -370,9 +375,10 @@ function renderTop(){
   b.addEventListener("click",()=>{if(save.partner!==x.id){save.partner=x.id;persist();Snd.tap();renderTop()}});
   pc.appendChild(b)});
  const g=$("missionGrid");g.innerHTML="";
- MISSIONS.forEach(m=>{const done=save.cleared.includes(m.id);
-  const b=document.createElement("button");b.type="button";b.className="mcard"+(done?" cleared":"");
-  b.innerHTML='<span class="num">ミッション '+m.id+"</span><span class='ttl'>"+m.title+'</span><span class="step">'+m.step+'</span><span class="stat '+(done?"":"yet")+'">'+(done?"★ クリアずみ":"まだ ちょうせん していない")+"</span>";
+ const nextReco=MISSIONS.map(m=>m.id).find(id=>!save.cleared.includes(id));
+ MISSIONS.forEach(m=>{const done=save.cleared.includes(m.id),reco=m.id===nextReco;
+  const b=document.createElement("button");b.type="button";b.className="mcard"+(done?" cleared":"")+(reco?" reco":"");
+  b.innerHTML='<span class="num">ミッション '+m.id+(reco?'<span class="reco-tag">⭐ おすすめ</span>':"")+"</span><span class='ttl'>"+m.title+'</span><span class="step">'+m.step+'</span><span class="grade">'+gradeOf(m.id)+'</span><span class="stat '+(done?"":"yet")+'">'+(done?"★ クリアずみ":"まだ ちょうせん していない")+"</span>";
   b.addEventListener("click",()=>{Snd.tap();openMission(m.id)});g.appendChild(b)});
 }
 /* ===== プログラム画面 ===== */
@@ -387,7 +393,7 @@ function openMission(id){
  cur=id;program=(mission().preset||[]).map(t=>({id:nid(),type:t}));selId=null;hintIdx=0;guide=GUIDES[Math.floor(Math.random()*GUIDES.length)];
  $("guideName").textContent="ガイド："+guide.name;
  $("guideFace").innerHTML='<svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="17" fill="'+guide.color+'"/><circle cx="14" cy="18" r="2.4" fill="#0F172A"/><circle cx="26" cy="18" r="2.4" fill="#0F172A"/><path d="M14 25 Q20 29 26 25" stroke="#0F172A" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>';
- const m=mission();$("mStep").textContent=m.step;$("mTitle").textContent="ミッション "+m.id+"："+m.title;$("mGoal").textContent=m.desc;
+ const m=mission();$("mStep").textContent=m.step+"｜"+gradeOf(m.id);$("mTitle").textContent="ミッション "+m.id+"："+m.title;$("mGoal").textContent=m.desc;
  $("hintNo").textContent="1/"+m.hints.length;
  $("screenTop").classList.add("hidden");$("screenPlay").classList.remove("hidden");$("btnBackTop").classList.remove("hidden");
  resetStage();renderProgram();

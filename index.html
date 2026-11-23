@@ -124,7 +124,7 @@ main{max-width:1180px;margin:0 auto;padding:12px 14px}
 .pbtn .ic{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:900;flex-shrink:0}
 .pbtn .lb{font-size:14.5px;font-weight:900;line-height:1.25}
 .pbtn .ds{font-size:10px;font-weight:700;opacity:.85}
-.b-forward{background:#2563EB}.b-back{background:#4F46E5}.b-right{background:#EA580C}.b-left{background:#7C3AED}
+.b-forward{background:#2563EB}.b-back{background:#4F46E5}.b-right{background:#EA580C}.b-left{background:#7C3AED}.b-repeat{background:#0D9488}
 .prog-head{padding:10px 14px;border-bottom:2px solid #EFF6FF;background:#F8FBFF;display:flex;justify-content:space-between;align-items:center}
 .prog-head b{font-size:14px}
 .count-badge{background:#DBEAFE;color:#1D4ED8;font-size:11px;font-weight:900;border-radius:999px;padding:2px 9px;margin-left:6px}
@@ -138,6 +138,11 @@ main{max-width:1180px;margin:0 auto;padding:12px 14px}
 .blk .lb{font-weight:900;font-size:13.5px;white-space:nowrap}
 .blk .ops{display:flex;gap:4px}
 .blk .ops button{width:29px;height:29px;border:none;border-radius:9px;background:rgba(255,255,255,.22);color:#fff;font-weight:900;font-size:13px}
+.rep-wrap{margin:0 0 6px 14px;border-left:4px solid #99F6E4;padding-left:8px}
+.rep-empty{font-size:11px;font-weight:800;color:#94A3B8;border:1.5px dashed #CBD5E1;border-radius:10px;padding:6px 9px;margin-bottom:6px;cursor:pointer}
+.blk .cnt{display:inline-flex;align-items:center;gap:3px;margin-left:6px}
+.blk .cnt button{width:24px;height:24px;border-radius:8px;border:none;background:rgba(255,255,255,.35);color:#fff;font-weight:900;cursor:pointer;font-size:14px;line-height:1}
+.blk .cnt .cv{font-weight:900;font-size:13px;min-width:34px;text-align:center}
 .blk.sel{outline:3px solid #F59E0B;outline-offset:-1px}
 .blk.exec{outline:4px solid #F59E0B;background:#B45309 !important}
 .confirmbar{background:#FFF1F2;border-bottom:2px solid #FECDD3;padding:8px 12px;font-size:12px;font-weight:800;color:#9F1239;display:flex;justify-content:space-between;align-items:center}
@@ -327,19 +332,30 @@ const MISSIONS=[
 {id:26,step:"STEP 3：ふりかえり・デバッグ",title:"まちがいを なおそう 2",desc:"まがる むきが まちがっている みたい。ブロックを 入れかえて なおそう。",size:5,start:{x:1,y:3,dir:0},goal:{x:3,y:1},rocks:[],stars:[],preset:["forward","forward","left","forward","forward"],hints:["かどで まがる むきが ちがう みたい。","まちがいは 3つめの ブロックだよ。","「ひだりを むく」を「みぎを むく」に 入れかえよう。"]},
 {id:27,step:"STEP 3：ふりかえり・デバッグ",title:"たりない めいれい",desc:"プログラムが とちゅうで 終わっている。たりない めいれいを たして 完成させよう。",size:5,start:{x:0,y:4,dir:0},goal:{x:3,y:1},rocks:[{x:1,y:2},{x:2,y:2}],stars:[{x:0,y:1}],preset:["forward","forward","forward"],hints:["スターは とれているけど、ゴールまで とどいていないね。","プログラムの つづきを 自分で たそう。","スターのあと：みぎをむく→すすむ×3→みぎをむく→すすむ×2 だよ。"]},
 {id:28,step:"STEP 3：ふりかえり・デバッグ",title:"みじかく できるかな",desc:"この プログラムでも ゴールできるけど、もっと みじかく できる。ブロックを へらして なおそう。",size:5,start:{x:0,y:2,dir:1},goal:{x:4,y:2},rocks:[],stars:[],preset:["left","forward","right","forward","forward","forward","forward","right","forward"],hints:["まず そのまま じっこうして、どんな みちを 通るか 見てみよう。","ゴールは まっすぐ みぎ。まわりみちは いらないよ。","「まえに すすむ」×4 だけで ゴールできるよ。"]},
-{id:29,step:"STEP 3：ふりかえり・デバッグ",title:"くりかえしに 気づこう",desc:"おなじ めいれいが 5つも ならんでいるね。Phase 2では「くりかえし」で みじかく かけるように なるよ。まずは そのまま じっこうして スターを とろう。",size:6,start:{x:0,y:3,dir:1},goal:{x:5,y:3},rocks:[],stars:[{x:3,y:3}],preset:["forward","forward","forward","forward","forward"],hints:["おなじ ブロックが 5つ。まずは そのまま じっこうしてみよう。","とちゅうで スターも とれるよ。","Phase 2では「くりかえし」ブロックで、この 5つを みじかく かけるように なるよ。"]},
+{id:29,step:"STEP 3：ふりかえり・デバッグ",title:"くりかえしに 気づこう",desc:"おなじ めいれいが 5つも ならんでいるね。STEP 5では「くりかえし」で みじかく かけるように なるよ。まずは そのまま じっこうして スターを とろう。",size:6,start:{x:0,y:3,dir:1},goal:{x:5,y:3},rocks:[],stars:[{x:3,y:3}],preset:["forward","forward","forward","forward","forward"],hints:["おなじ ブロックが 5つ。まずは そのまま じっこうしてみよう。","とちゅうで スターも とれるよ。","STEP 5では「くりかえし」ブロックで、この 5つを みじかく かけるように なるよ。"]},
 {id:30,step:"STEP 3：ふりかえり・デバッグ",title:"デバッグ チャレンジ",desc:"かべに ぶつかる プログラムに なっている。どこが まちがいか 見つけて なおそう。",size:5,start:{x:0,y:4,dir:0},goal:{x:4,y:0},rocks:[{x:1,y:1},{x:1,y:2},{x:1,y:3}],stars:[],preset:["forward","forward","forward","right","forward","forward"],hints:["ぶつかる ところまで じっこうして、どこで 止まるか 見てみよう。","まちがいは「すすむ」の かいすう。かどの 手前で まがっているよ。","すすむ×4→みぎをむく→すすむ×4 が ただしい かいすうだよ。"]},
 {id:31,step:"STEP 4：チャレンジ",title:"おおきな めいろ",desc:"6×6の めいろ。かべの すきまは うえと したに あるよ。",size:6,start:{x:0,y:5,dir:0},goal:{x:5,y:0},rocks:[{x:1,y:1},{x:1,y:2},{x:1,y:3},{x:1,y:4},{x:3,y:1},{x:3,y:2},{x:3,y:3},{x:3,y:4}],stars:[],preset:null,hints:["かべは 2まい。すきまは うえと しただよ。","うえの すきまを 通る ルートが みじかいよ。","すすむ×5→みぎをむく→すすむ×5 だよ。"]},
 {id:32,step:"STEP 4：チャレンジ",title:"スター コンプリート",desc:"スターは 3つの かどに ある。ぜんぶ まわってから ゴールの かどへ。",size:5,start:{x:2,y:4,dir:0},goal:{x:4,y:4},rocks:[],stars:[{x:0,y:4},{x:0,y:0},{x:4,y:0}],preset:null,hints:["スターは 3つの かど。ゴールは のこりの かどだよ。","外まわりを ぐるっと 1しゅう する つもりで かんがえよう。","ひだりをむく→すすむ×2→みぎをむく→すすむ×4→みぎをむく→すすむ×4→みぎをむく→すすむ×4 だよ。"]},
 {id:33,step:"STEP 4：チャレンジ",title:"かべだらけの へや",desc:"いわが いっぱい。とおれる みちは したの ルートだけ。",size:5,start:{x:0,y:2,dir:1},goal:{x:4,y:2},rocks:[{x:1,y:0},{x:1,y:2},{x:1,y:4},{x:3,y:0},{x:3,y:2},{x:3,y:4},{x:2,y:1}],stars:[],preset:null,hints:["うえの みちは いわで ふさがれているよ。","とおれるのは したの ルートだけ。","みぎをむく→すすむ→ひだりをむく→すすむ×4→ひだりをむく→すすむ だよ。"]},
 {id:34,step:"STEP 4：チャレンジ",title:"さがるの たつじん",desc:"「さがる」を つかいこなそう。スターを とって ゴールへ むかおう。",size:5,start:{x:2,y:2,dir:1},goal:{x:0,y:4},rocks:[{x:3,y:2},{x:2,y:1},{x:2,y:3}],stars:[{x:1,y:2}],preset:null,hints:["まわりは いわ。あいているのは うしろだけ。","スターは うしろの みちに あるよ。","さがる×2→みぎをむく→すすむ×2 だよ。"]},
-{id:35,step:"STEP 4：チャレンジ",title:"さいごの チャレンジ",desc:"スター 2つと ゴール、ぜんぶ めぐる さいごの チャレンジ。じゅんばんが 大事だよ。",size:5,start:{x:0,y:4,dir:1},goal:{x:4,y:0},rocks:[{x:1,y:2},{x:2,y:2},{x:3,y:2}],stars:[{x:4,y:4},{x:0,y:0}],preset:null,hints:["スターは みぎしたと ひだりうえ。ゴールは みぎうえだよ。","ゴールに 先に つくと クリアに ならない。じゅんばんが 大事。","うえの スター→もどって→みぎの スター→うえの ゴール、が おすすめの じゅんばんだよ。"]}
+{id:35,step:"STEP 4：チャレンジ",title:"さいごの チャレンジ",desc:"スター 2つと ゴール、ぜんぶ めぐる さいごの チャレンジ。じゅんばんが 大事だよ。",size:5,start:{x:0,y:4,dir:1},goal:{x:4,y:0},rocks:[{x:1,y:2},{x:2,y:2},{x:3,y:2}],stars:[{x:4,y:4},{x:0,y:0}],preset:null,hints:["スターは みぎしたと ひだりうえ。ゴールは みぎうえだよ。","ゴールに 先に つくと クリアに ならない。じゅんばんが 大事。","うえの スター→もどって→みぎの スター→うえの ゴール、が おすすめの じゅんばんだよ。"]},
+{id:36,step:"STEP 5：くりかえし",title:"くりかえし デビュー",desc:"あたらしい ブロック「くりかえし」を つかおう。なかに「すすむ」を 入れて、5かい くりかえすと…？",size:6,start:{x:0,y:3,dir:1},goal:{x:5,y:3},rocks:[],stars:[],hints:["パレットに「くりかえし」が ふえたよ。まず おいてみよう。","「くりかえし」を えらんだまま「すすむ」を おすと、なかに 入るよ。","くりかえしの かいすうを 5かいに すると、すすむ×5 と おなじだよ。"]},
+{id:37,step:"STEP 5：くりかえし",title:"ロング ロード",desc:"ながい みちも「くりかえし」で みじかく かける。2つの くりかえしを つかおう。",size:6,start:{x:0,y:0,dir:1},goal:{x:5,y:5},rocks:[],stars:[],hints:["まず みぎへ まっすぐ 5マス。ここは くりかえし 1つめ。","かどで みぎを むいて、もう 1つ くりかえしを つかおう。","くりかえし(すすむ×5)→みぎをむく→くりかえし(すすむ×5) だよ。"]},
+{id:38,step:"STEP 5：くりかえし",title:"しかくの たんけん",desc:"四角の みちは、おなじ うごきの くりかえし。スターを とって スタートに もどろう。",size:5,start:{x:1,y:1,dir:1},goal:{x:1,y:1},rocks:[],stars:[{x:4,y:1},{x:4,y:4},{x:1,y:4}],hints:["1つの かどまで：すすむ×3→みぎをむく。これが 1セット。","その セットを 3かい くりかえすと、3つの スターが とれるよ。","さいごは すすむ×3 で スタート（ゴール）に もどるよ。"]},
+{id:39,step:"STEP 5：くりかえし",title:"かいだん のぼり",desc:"かいだんは「すすむ・みぎ・すすむ・ひだり」の くりかえし。4だん のぼろう。",size:6,start:{x:0,y:5,dir:0},goal:{x:4,y:1},rocks:[],stars:[{x:1,y:3},{x:3,y:2}],hints:["1だんぶんの うごきを 見つけよう：すすむ→みぎをむく→すすむ→ひだりをむく。","その 4つを くりかえしの なかに 入れよう。","かいすうは 4かい。スターも とちゅうで とれるよ。"]},
+{id:40,step:"STEP 5：くりかえし",title:"スター ライン",desc:"スターが 1れつに ならんでいる。くりかえしで すすみながら ぜんぶ とろう。",size:6,start:{x:0,y:2,dir:1},goal:{x:5,y:2},rocks:[],stars:[{x:1,y:2},{x:2,y:2},{x:3,y:2},{x:4,y:2}],hints:["すすむたびに スターが とれる みちだよ。","「くりかえし」に すすむを 入れて 5かい。","ゴールまで 5マス。かいすうは 5かいだよ。"]},
+{id:41,step:"STEP 5：くりかえし",title:"かいだん チャレンジ",desc:"かいだんの くりかえし おぼえた？さいごは まっすぐ のぼって ゴール。",size:6,start:{x:0,y:5,dir:0},goal:{x:3,y:0},rocks:[{x:0,y:2},{x:1,y:1},{x:5,y:5},{x:4,y:4},{x:5,y:0}],stars:[{x:2,y:3},{x:3,y:2}],hints:["うごきは ミッション39と おなじ パターンだよ。","くりかえしは 3かい。そこから すすむ×2 で ゴール。","いわは みちの そとに あるだけ。あんしんして パターンを つかおう。"]},
+{id:42,step:"STEP 5：くりかえし",title:"へやの おそうじ",desc:"へやを すみずみまで おそうじ。たての みちを 3本、くりかえしで すすもう。",size:6,start:{x:0,y:5,dir:0},goal:{x:2,y:0},rocks:[],stars:[{x:0,y:2},{x:1,y:3},{x:2,y:1}],hints:["たての みち 1本は すすむ×5＝くりかえし 1つ。","よこへ 1マス うつる うごきを はさんで、つぎの たて みちへ。","くりかえしは 3つ つかうよ。スターは みちの とちゅうに あるよ。"]},
+{id:43,step:"STEP 5：くりかえし",title:"おおきな しかく",desc:"6×6の おおきな 四角。1へんは すすむ×5。くりかえしで ぐるっと まわろう。",size:6,start:{x:0,y:5,dir:0},goal:{x:0,y:5},rocks:[],stars:[{x:0,y:0},{x:5,y:0},{x:5,y:5}],hints:["1へん：すすむ×5→みぎをむく。これを くりかえそう。","3へんぶん くりかえすと、スター 3つが とれるよ。","さいごの 1へんは すすむ×5 で スタートに もどるよ。"]},
+{id:44,step:"STEP 5：くりかえし",title:"入れ子 しかく",desc:"「くりかえしの なかに くりかえし」＝入れ子。ちいさな 四角を かいて スタートへ もどろう。",size:6,start:{x:2,y:4,dir:0},goal:{x:2,y:4},rocks:[],stars:[{x:2,y:2},{x:4,y:2},{x:4,y:4}],hints:["まず ないがわ：くりかえし(すすむ×2)で 1へん。","そとがわの くりかえしに「ないがわ＋みぎをむく」を 入れて 3かい。","さいごは くりかえし(すすむ×2)で スタート（ゴール）へ。"]},
+{id:45,step:"STEP 5：くりかえし",title:"さいごの ロングラン",desc:"スター 2つと ゴール。くりかえし 2つで かいけつしよう。",size:6,start:{x:0,y:5,dir:1},goal:{x:5,y:0},rocks:[],stars:[{x:2,y:5},{x:5,y:2}],hints:["したの へんは くりかえし(すすむ×5)。とちゅうで スター。","かどで ひだりを むいて、みぎの へんも くりかえし(すすむ×5)。","2つの くりかえしと 1つの「ひだりを むく」だけで クリアできるよ。"]}
 ];
 const BLOCKS=[
 {type:"forward",label:"まえに すすむ",desc:"1マス まえへ",icon:"↑",cls:"b-forward"},
 {type:"back",label:"うしろに さがる",desc:"むきは そのまま 1マス うしろへ",icon:"↓",cls:"b-back"},
 {type:"right",label:"みぎを むく",desc:"そのばで みぎへ 90°",icon:"↻",cls:"b-right"},
-{type:"left",label:"ひだりを むく",desc:"そのばで ひだりへ 90°",icon:"↺",cls:"b-left"}];
+{type:"left",label:"ひだりを むく",desc:"そのばで ひだりへ 90°",icon:"↺",cls:"b-left"},
+{type:"repeat",label:"くりかえし",desc:"なかの めいれいを なんかいも くりかえす",icon:"🔁",cls:"b-repeat"}];
 const META={}; BLOCKS.forEach(b=>META[b.type]=b);
 const GUIDES=[{name:"そら",color:"#38BDF8"},{name:"りく",color:"#4ADE80"},{name:"かい",color:"#A78BFA"},{name:"さく",color:"#F9A8D4"},{name:"つき",color:"#FCD34D"},{name:"なみ",color:"#60A5FA"}];
 /* ===== パートナー（ナビアン）育成：カタログの実在3体から選択・3段階進化 =====
@@ -356,7 +372,7 @@ function partnerImg(partnerId,stage){
  return NAVI_BASE+"zako/"+partnerId+".webp"}
 function partner(){return PARTNERS.find(x=>x.id===save.partner)||PARTNERS[0]}
 /* 学年のめやす（ロックではなく目安表示のみ） */
-function gradeOf(id){if(id<=8)return "1〜2年生の めやす";if(id<=16)return "2〜3年生の めやす";if(id<=24)return "3〜4年生の めやす";if(id<=30)return "4〜5年生の めやす";return "5〜6年生の めやす"}
+function gradeOf(id){if(id<=8)return "1〜2年生の めやす";if(id<=16)return "2〜3年生の めやす";if(id<=24)return "3〜4年生の めやす";if(id<=30)return "4〜5年生の めやす";if(id<=35)return "5〜6年生の めやす";if(id<=40)return "3〜4年生の めやす";return "4〜5年生の めやす"}
 const STAGES=[{at:0},{at:40},{at:100}];
 function stageOf(xp){let st=1;STAGES.forEach((s2,i)=>{if(xp>=s2.at)st=i+1});return st}
 function curXp(){return (save.xpBy&&save.xpBy[partner().id])||0}
@@ -413,13 +429,13 @@ function renderTop(){
 /* ===== プログラム画面 ===== */
 function buildPalette(){
  const p=$("palette");p.innerHTML="";
- BLOCKS.forEach(b=>{const btn=document.createElement("button");btn.type="button";btn.className="pbtn "+b.cls;
+ BLOCKS.forEach(b=>{if(b.type==="repeat"&&cur<36)return;const btn=document.createElement("button");btn.type="button";btn.className="pbtn "+b.cls;
   btn.innerHTML='<span class="ic">'+b.icon+'</span><span><span class="lb">'+b.label+'</span><br><span class="ds">'+b.desc+"</span></span>";
   btn.addEventListener("click",()=>addBlock(b.type));p.appendChild(btn)});
- const note=document.createElement("p");note.className="pal-note";note.textContent="プログラムは 上から じゅんばんに うごくよ。ならびかえは ↑↓、けすときは × を つかってね。";p.appendChild(note);
+ const note=document.createElement("p");note.className="pal-note";note.textContent=cur>=36?"「くりかえし」を えらんでから ブロックを おすと、なかに 入るよ。ならびかえは ↑↓、けすときは ×。":"プログラムは 上から じゅんばんに うごくよ。ならびかえは ↑↓、けすときは × を つかってね。";p.appendChild(note);
 }
 function openMission(id){
- cur=id;program=(mission().preset||[]).map(t=>({id:nid(),type:t}));selId=null;hintIdx=0;guide=GUIDES[Math.floor(Math.random()*GUIDES.length)];
+ cur=id;program=(mission().preset||[]).map(t=>({id:nid(),type:t}));selId=null;hintIdx=0;buildPalette();guide=GUIDES[Math.floor(Math.random()*GUIDES.length)];
  $("guideName").textContent="ガイド："+guide.name;
  $("guideFace").innerHTML='<svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="17" fill="'+guide.color+'"/><circle cx="14" cy="18" r="2.4" fill="#0F172A"/><circle cx="26" cy="18" r="2.4" fill="#0F172A"/><path d="M14 25 Q20 29 26 25" stroke="#0F172A" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>';
  const m=mission();$("mStep").textContent=m.step+"｜"+gradeOf(m.id);$("mTitle").textContent="ミッション "+m.id+"："+m.title;$("mGoal").textContent=m.desc;
@@ -483,21 +499,43 @@ function renderObjects(){
 const DIR_TXT=["↑ きた","→ ひがし","↓ みなみ","← にし"];
 function updateRobot(){$("robot").style.transform="translate("+(robot.x*100)+"%, "+(robot.y*100)+"%)";const da=$("dirArrow");if(da)da.style.transform="rotate("+robot.angle+"deg)";const dn=$("dirNow");if(dn)dn.textContent=DIR_TXT[robot.dir]}
 /* ===== プログラム編集（タップのみ） ===== */
-function addBlock(type){if(exec.status==="running")return;Snd.tap();const nb={id:nid(),type};const ix=program.findIndex(b=>b.id===selId);if(ix>=0)program.splice(ix+1,0,nb);else program.push(nb);selId=nb.id;renderProgram();
+function findLoc(blocks,id){for(let i=0;i<blocks.length;i++){const b=blocks[i];if(b.id===id)return{list:blocks,index:i,block:b};if(b.type==="repeat"){const r=findLoc(b.children,id);if(r)return r}}return null}
+function expandBlocks(blocks,out){out=out||[];blocks.forEach(b=>{if(b.type==="repeat"){for(let i=0;i<(b.count||2);i++)expandBlocks(b.children,out)}else out.push({id:b.id,type:b.type})});return out}
+function addBlock(type){if(exec.status==="running")return;Snd.tap();const nb=type==="repeat"?{id:nid(),type,count:2,children:[]}:{id:nid(),type};
+ const loc=selId?findLoc(program,selId):null;
+ if(loc&&loc.block.type==="repeat")loc.block.children.push(nb);
+ else if(loc)loc.list.splice(loc.index+1,0,nb);
+ else program.push(nb);
+ selId=nb.id;renderProgram();
  const l=$("progList");l.scrollTop=l.scrollHeight}
 function renderProgram(){
- $("blkCount").textContent=program.length+"こ";
+ $("blkCount").textContent=expandBlocks(program).length+"こ";
  const l=$("progList");l.innerHTML="";
  if(!program.length){l.innerHTML='<div class="empty">ここに めいれいが ならぶよ<br>まんなかの ブロックを タップしてね</div>';return}
- program.forEach((b,i)=>{const meta=META[b.type];const row=document.createElement("div");row.className="blk "+meta.cls+(exec.activeId===b.id?" exec":"")+(selId===b.id?" sel":"");row.id="dom_"+b.id;
-  row.innerHTML='<span class="left"><span class="no">'+(i+1)+'</span><span style="font-weight:900">'+meta.icon+'</span><span class="lb">'+meta.label+'</span></span><span class="ops"><button data-a="up" title="うえへ">↑</button><button data-a="down" title="したへ">↓</button><button data-a="del" title="けす">×</button></span>';
-  row.querySelector('[data-a="up"]').addEventListener("click",()=>move(i,-1));
-  row.querySelector('[data-a="down"]').addEventListener("click",()=>move(i,1));
-  row.querySelector('[data-a="del"]').addEventListener("click",()=>{if(exec.status==="running")return;Snd.del();if(selId===b.id)selId=null;program.splice(i,1);renderProgram()});
-  row.addEventListener("click",e=>{if(e.target.closest(".ops"))return;selId=b.id;renderProgram()});
-  l.appendChild(row)});
+ renderList(program,l);
 }
-function move(i,d){if(exec.status==="running")return;const j=i+d;if(j<0||j>=program.length)return;Snd.tap();const t=program[i];program[i]=program[j];program[j]=t;renderProgram()}
+function renderList(blocks,parent){
+ blocks.forEach((b,i)=>{const meta=META[b.type];const row=document.createElement("div");row.className="blk "+meta.cls+(exec.activeId===b.id?" exec":"")+(selId===b.id?" sel":"");row.id="dom_"+b.id;
+  let left='<span class="left"><span class="no">'+(i+1)+'</span><span style="font-weight:900">'+meta.icon+'</span><span class="lb">'+(b.type==="repeat"?"くりかえし":meta.label)+"</span>";
+  if(b.type==="repeat")left+='<span class="cnt"><button data-a="minus" title="へらす">−</button><span class="cv">'+b.count+'かい</span><button data-a="plus" title="ふやす">＋</button></span>';
+  left+="</span>";
+  row.innerHTML=left+'<span class="ops"><button data-a="up" title="うえへ">↑</button><button data-a="down" title="したへ">↓</button><button data-a="del" title="けす">×</button></span>';
+  row.querySelector('[data-a="up"]').addEventListener("click",()=>moveIn(blocks,i,-1));
+  row.querySelector('[data-a="down"]').addEventListener("click",()=>moveIn(blocks,i,1));
+  row.querySelector('[data-a="del"]').addEventListener("click",()=>{if(exec.status==="running")return;Snd.del();if(selId===b.id)selId=null;blocks.splice(i,1);renderProgram()});
+  if(b.type==="repeat"){
+   row.querySelector('[data-a="minus"]').addEventListener("click",()=>{if(exec.status==="running")return;if(b.count>1){b.count--;Snd.tap();renderProgram()}});
+   row.querySelector('[data-a="plus"]').addEventListener("click",()=>{if(exec.status==="running")return;if(b.count<9){b.count++;Snd.tap();renderProgram()}});
+  }
+  row.addEventListener("click",e=>{if(e.target.closest(".ops")||e.target.closest(".cnt"))return;selId=b.id;renderProgram()});
+  parent.appendChild(row);
+  if(b.type==="repeat"){const wrap=document.createElement("div");wrap.className="rep-wrap";
+   if(!b.children.length){const em=document.createElement("div");em.className="rep-empty";em.textContent="なかは からっぽ。「くりかえし」を えらんだまま ブロックを おすと 入るよ";em.addEventListener("click",()=>{selId=b.id;renderProgram()});wrap.appendChild(em)}
+   else renderList(b.children,wrap);
+   parent.appendChild(wrap)}
+ });
+}
+function moveIn(list,i,d){if(exec.status==="running")return;const j=i+d;if(j<0||j>=list.length)return;Snd.tap();const t=list[i];list[i]=list[j];list[j]=t;renderProgram()}
 /* ===== 実行エンジン（ASTを1命令ずつ解釈・eval不使用） ===== */
 function stopTimer(){if(exec.timer){clearTimeout(exec.timer);exec.timer=null}}
 function updateRunBtn(){const b=$("btnRun");
@@ -509,7 +547,7 @@ function runOrPause(){
  if(exec.status==="paused"){exec.status="running";updateRunBtn();schedule();return}
  if(!program.length){Snd.bump();setMsg("まだ めいれいが ないよ。ブロックを タップしてね。","warn");return}
  const keep=program.slice();resetStage();program=keep;
- exec.queue=program.map(b=>({id:b.id,type:b.type}));exec.ptr=0;exec.status="running";updateRunBtn();
+ exec.queue=expandBlocks(program);exec.ptr=0;exec.status="running";updateRunBtn();
  setMsg("しゅっぱつ！うごきを よく 見てみよう。");schedule(200);
 }
 function schedule(ms){stopTimer();exec.timer=setTimeout(step,ms||(fast?280:580))}
@@ -537,8 +575,8 @@ function onClear(){
  stopTimer();exec.status="idle";exec.activeId=null;updateRunBtn();renderProgram();Snd.clear();
  const m=mission(),first=!save.cleared.includes(m.id);
  if(first)save.cleared.push(m.id);
- const gain=first?20:5,pt=partner(),before=stageOf(curXp());save.xpBy[pt.id]=curXp()+gain;const after=stageOf(curXp());save.programs[cur]=program.map(b=>b.type);persist();
- $("clearStats").textContent=m.title+"｜つかった めいれい "+program.length+"こ｜+"+gain+" XP ゲット！";
+ const gain=first?20:5,pt=partner(),before=stageOf(curXp());save.xpBy[pt.id]=curXp()+gain;const after=stageOf(curXp());save.programs[cur]=expandBlocks(program).map(x=>x.type);persist();
+ $("clearStats").textContent=m.title+"｜つかった めいれい "+expandBlocks(program).length+"こ｜+"+gain+" XP ゲット！";
  const evo=$("evoAnnounce");
  if(after>before){evo.classList.remove("hidden");evo.innerHTML="✨ しんか！ パートナーが「"+pt.names[after-1]+"」に そだったよ！<br><img src=\""+partnerImg(pt.id,after)+"\" alt=\""+pt.names[after-1]+"\" style=\"width:76px;height:76px;object-fit:contain\">"}
  else evo.classList.add("hidden");

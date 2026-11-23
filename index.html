@@ -77,20 +77,23 @@ main{max-width:1180px;margin:0 auto;padding:12px 14px}
 .rec-sum .box b{display:block;font-size:21px;color:#1D4ED8}
 .rec-sum .box span{font-size:11px;font-weight:800;color:#64748B}
 .chip-count{display:inline-block;background:#F0FDF4;border:1.5px solid #BBF7D0;color:#15803D;font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 10px;margin:0 5px 5px 0}
-.pchoices{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.pchoices{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:12px;max-height:168px;overflow-y:auto;padding-right:2px;scrollbar-width:thin}
+.pchoice.locked{opacity:.75;cursor:default}
+.pchoice.locked img{filter:grayscale(1)}
+.mfilters{display:flex;flex-wrap:nowrap;gap:6px;margin:0 0 10px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin}.mfilters .ed-chip{white-space:nowrap}
 .pchoice{border:2px solid #E2E8F0;background:#fff;border-radius:16px;padding:7px 4px 6px;cursor:pointer;text-align:center;transition:transform .1s,border-color .1s}
 .pchoice:active{transform:scale(.96)}
-.pchoice img{width:56px;height:56px;object-fit:contain;display:block;margin:0 auto}
+.pchoice img{width:44px;height:44px;object-fit:contain;display:block;margin:0 auto}
 .pchoice .pn{font-size:10.5px;font-weight:900;line-height:1.3;display:block;margin-top:2px}
 .pchoice .px{font-size:9.5px;font-weight:800;color:#94A3B8;display:block}
 .pchoice.sel{border-color:#F59E0B;background:#FFFBEB;box-shadow:0 0 0 2px #FDE68A}
-.partner-img{width:132px;height:132px;object-fit:contain}
+.partner-img{width:100px;height:100px;object-fit:contain}
 .evo-step img{width:46px;height:46px;object-fit:contain}
 .partner-msg{font-size:12px;font-weight:700;color:#475569;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:14px;padding:8px;margin-top:12px;line-height:1.5}
 .missions{padding:14px 16px}
 .missions h2{margin:0 0 4px;font-size:17px;font-weight:900}
 .missions .lead{margin:0 0 10px;font-size:12px;font-weight:700;color:var(--sub)}
-.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-height:596px;overflow-y:auto;padding-right:4px;scrollbar-width:thin}
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-height:540px;overflow-y:auto;padding-right:4px;scrollbar-width:thin}
 .mcard{border:2px solid #E2E8F0;border-radius:18px;padding:10px;background:#fff;text-align:left;transition:transform .1s,border-color .1s;min-height:118px;display:flex;flex-direction:column;gap:4px}
 .mcard:active{transform:scale(.97)}
 .mcard:hover{border-color:#93C5FD}
@@ -236,7 +239,7 @@ main{max-width:1180px;margin:0 auto;padding:12px 14px}
       <div><span class="stage-name" id="partnerStage">ステージ 1：ぷるんスライム</span></div>
       <div class="xp-row"><span>いくせい ポイント</span><span id="xpText">0 XP</span></div>
       <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width:0%"></div></div>
-      <div class="xp-row"><span id="xpNext">つぎの しんかまで あと 40 XP</span><span id="clearCount">クリア 0/8</span></div>
+      <div class="xp-row"><span id="xpNext">つぎの しんかまで あと 120 XP</span><span id="clearCount">クリア 0/8</span></div>
       <div class="evo-road" id="evoRoad"></div>
       <p class="partner-msg" id="partnerMsg">ミッションを クリアすると ポイントが たまって、パートナーが そだつよ。くりかえし クリアしても 少し たまるよ。</p>
       <div class="pchoices" id="partnerChoices"></div>
@@ -245,6 +248,7 @@ main{max-width:1180px;margin:0 auto;padding:12px 14px}
     <section class="card missions">
       <h2>ミッションを えらぼう</h2>
       <p class="lead">番号の じゅんに すすむのが おすすめ（⭐マーク）。どの ミッションからでも ちょうせんできるよ。学年は めやすだよ。</p>
+      <div class="mfilters" id="missionFilters"></div>
       <div class="mgrid" id="missionGrid"></div>
     </section>
   </div>
@@ -494,9 +498,18 @@ const GUIDES=[{name:"そら",color:"#38BDF8"},{name:"りく",color:"#4ADE80"},{n
    パス形式: assets/web/fantasy/monsters/{zako|zako-evolved|zako-lastevo}/{id}.webp（公開版で全9点 200確認済み） */
 const NAVI_BASE="https://tt-sensei.github.io/navi-character-/assets/web/fantasy/monsters/";
 const PARTNERS=[
- {id:"purun-little-magic-slime",names:["ぷるんスライム","ぷるんスライム・エボル","ぷるんスライム・ラスエボ"]},
- {id:"sakura-snow-puff",names:["さくらスノーパフ","さくらスノーパフ・エボル","さくらスノーパフ・ラスエボ"]},
- {id:"mofu-wolf-frost-pup",names:["もふウルフ","もふウルフ・エボル","もふウルフ・ラスエボ"]}];
+ {id:"purun-little-magic-slime",unlock:0,names:["ぷるんスライム","ぷるんスライム・エボル","ぷるんスライム・ラスエボ"]},
+ {id:"sakura-snow-puff",unlock:0,names:["さくらスノーパフ","さくらスノーパフ・エボル","さくらスノーパフ・ラスエボ"]},
+ {id:"mofu-wolf-frost-pup",unlock:0,names:["もふウルフ","もふウルフ・エボル","もふウルフ・ラスエボ"]},
+ {id:"happa-squirrel-leafy",unlock:10,names:["はっぱリス","はっぱリス・エボル","はっぱリス・ラスエボ"]},
+ {id:"hinoko-ember-newt",unlock:10,names:["ひのこイモリ","ひのこイモリ・エボル","ひのこイモリ・ラスエボ"]},
+ {id:"komorin-little-night-bat",unlock:20,names:["こもりんナイトバット","こもりんナイトバット・エボル","こもりんナイトバット・ラスエボ"]},
+ {id:"koro-golem-pebble-golem",unlock:20,names:["ころゴーレム","ころゴーレム・エボル","ころゴーレム・ラスエボ"]},
+ {id:"star-bat",unlock:35,names:["スターバット","スターバット・エボル","スターバット・ラスエボ"]},
+ {id:"kinoko-apple-mushroom",unlock:35,names:["りんごキノコ","りんごキノコ・エボル","りんごキノコ・ラスエボ"]},
+ {id:"berry-leafy",unlock:50,names:["ベリーリーフ","ベリーリーフ・エボル","ベリーリーフ・ラスエボ"]},
+ {id:"snow-mushroom",unlock:50,names:["スノーキノコ","スノーキノコ・エボル","スノーキノコ・ラスエボ"]}];
+function isUnlocked(x){return save.cleared.length>=(x.unlock||0)}
 function partnerImg(partnerId,stage){
  if(stage===2)return NAVI_BASE+"zako-evolved/"+partnerId+"-evolved.webp";
  if(stage===3)return NAVI_BASE+"zako-lastevo/"+partnerId+"-lastevo.webp";
@@ -504,7 +517,7 @@ function partnerImg(partnerId,stage){
 function partner(){return PARTNERS.find(x=>x.id===save.partner)||PARTNERS[0]}
 /* 学年のめやす（ロックではなく目安表示のみ） */
 function gradeOf(id){if(id<=8)return "1〜2年生の めやす";if(id<=16)return "2〜3年生の めやす";if(id<=24)return "3〜4年生の めやす";if(id<=30)return "4〜5年生の めやす";if(id<=35)return "5〜6年生の めやす";if(id<=40)return "3〜4年生の めやす";if(id<=50)return "4〜5年生の めやす";if(id<=64)return "4〜5年生の めやす";return "3〜4年生の めやす"}
-const STAGES=[{at:0},{at:40},{at:100}];
+const STAGES=[{at:0},{at:120},{at:300}];
 function stageOf(xp){let st=1;STAGES.forEach((s2,i)=>{if(xp>=s2.at)st=i+1});return st}
 function curXp(){return (save.xpBy&&save.xpBy[partner().id])||0}
 /* ===== 効果音（Web Audio・外部ファイルなし） ===== */
@@ -530,7 +543,7 @@ let exec={status:"idle",frames:[],timer:null,activeId:null};
 let robot={x:0,y:0,dir:1,angle:90};
 let uid=0; const nid=()=>"b"+(++uid);
 const $=id=>document.getElementById(id);
-let freeMission=null,freeMode=false,currentWork=null;
+let freeMission=null,freeMode=false,currentWork=null,missionFilter="all";
 function mission(){if(freeMission)return freeMission;return MISSIONS.find(m=>m.id===cur)||MISSIONS[0]}
 function missionEnemies(m){return (m.enemies&&m.enemies.length)?m.enemies:[{x:m.goal.x,y:m.goal.y,img:"koro-golem-pebble-golem",name:"ころゴーレム"}]}
 const BG_BY_STEP={"STEP 1":"grassland","STEP 2":"forest","STEP 3":"ruins","STEP 4":"volcano","STEP 5":"riverbank","STEP 6":"cave"};
@@ -552,14 +565,21 @@ function renderTop(){
  $("clearCount").textContent="クリア "+save.cleared.length+"/"+MISSIONS.length;
  $("evoRoad").innerHTML=STAGES.map((s2,i)=>'<div class="evo-step'+(st===i+1?" now":"")+'"><img src="'+partnerImg(pt.id,i+1)+'" alt="'+pt.names[i]+'"><br>'+(i+1)+". "+["","エボル","ラスエボ"][i]+"</div>").join('<div class="evo-arrow">▶</div>');
  const pc=$("partnerChoices");pc.innerHTML="";
- PARTNERS.forEach(x=>{const pxp=(save.xpBy&&save.xpBy[x.id])||0,pst=stageOf(pxp);
-  const b=document.createElement("button");b.type="button";b.className="pchoice"+(x.id===pt.id?" sel":"");
-  b.innerHTML='<img src="'+partnerImg(x.id,pst)+'" alt="'+x.names[pst-1]+'"><span class="pn">'+x.names[0]+'</span><span class="px">'+pxp+' XP・ステージ'+pst+"</span>";
-  b.addEventListener("click",()=>{if(save.partner!==x.id){save.partner=x.id;persist();Snd.tap();renderTop()}});
+ PARTNERS.forEach(x=>{const pxp=(save.xpBy&&save.xpBy[x.id])||0,pst=stageOf(pxp),unl=isUnlocked(x);
+  const b=document.createElement("button");b.type="button";b.className="pchoice"+(x.id===pt.id?" sel":"")+(unl?"":" locked");
+  if(unl){b.innerHTML='<img src="'+partnerImg(x.id,pst)+'" alt="'+x.names[pst-1]+'"><span class="pn">'+x.names[0]+'</span><span class="px">'+pxp+' XP・ステージ'+pst+"</span>";
+   b.addEventListener("click",()=>{if(save.partner!==x.id){save.partner=x.id;persist();Snd.tap();renderTop()}})}
+  else{b.innerHTML='<img src="'+partnerImg(x.id,1)+'" alt="'+x.names[0]+'"><span class="pn">🔒 '+x.names[0]+'</span><span class="px">'+x.unlock+'問 クリアで なかまに</span>';
+   b.addEventListener("click",()=>{Snd.tap();$("partnerMsg").textContent="「"+x.names[0]+"」は "+x.unlock+"問 クリアで なかまに なるよ（いま "+save.cleared.length+"問 クリア）。ミッションを すすめてね！"})}
   pc.appendChild(b)});
+ const mf=$("missionFilters");mf.innerHTML="";
+ const stepNums=[...new Set(MISSIONS.map(m=>{const mm=m.step.match(/STEP (\d+)/);return mm?+mm[1]:0}))].filter(n=>n>0).sort((a,b)=>a-b);
+ [{k:"all",lb:"すべて ("+MISSIONS.length+")"}].concat(stepNums.map(n=>({k:"s"+n,lb:"STEP "+n+" ("+MISSIONS.filter(m=>m.step.indexOf("STEP "+n+"：")===0).length+")"}))).forEach(f=>{
+  const b=document.createElement("button");b.type="button";b.className="ed-chip"+(missionFilter===f.k?" on":"");b.textContent=f.lb;
+  b.addEventListener("click",()=>{Snd.tap();missionFilter=f.k;renderTop()});mf.appendChild(b)});
  const g=$("missionGrid");g.innerHTML="";
  const nextReco=MISSIONS.map(m=>m.id).find(id=>!save.cleared.includes(id));
- MISSIONS.forEach(m=>{const done=save.cleared.includes(m.id),reco=m.id===nextReco;
+ MISSIONS.filter(m=>missionFilter==="all"||m.step.indexOf("STEP "+missionFilter.slice(1)+"：")===0).forEach(m=>{const done=save.cleared.includes(m.id),reco=m.id===nextReco;
   const b=document.createElement("button");b.type="button";b.className="mcard"+(done?" cleared":"")+(reco?" reco":"");
   b.innerHTML='<span class="num">ミッション '+m.id+(reco?'<span class="reco-tag">⭐ おすすめ</span>':"")+"</span><span class='ttl'>"+m.title+'</span><span class="step">'+m.step+'</span><span class="grade">'+gradeOf(m.id)+(m.subject?'｜教科：'+m.subject:'')+'</span><span class="stat '+(done?"":"yet")+'">'+(done?"★ クリアずみ":"まだ ちょうせん していない")+"</span>";
   b.addEventListener("click",()=>{Snd.tap();openMission(m.id)});g.appendChild(b)});
@@ -727,12 +747,16 @@ function onClear(){
  stopTimer();exec.status="idle";exec.activeId=null;updateRunBtn();renderProgram();Snd.clear();
  if(freeMode){freeClear();return}
  const m=mission(),first=!save.cleared.includes(m.id);
+ const clearedBefore=save.cleared.length;
  if(first)save.cleared.push(m.id);
+ const newlyUnlocked=first?PARTNERS.filter(x=>(x.unlock||0)>clearedBefore&&(x.unlock||0)<=save.cleared.length):[];
  const gain=first?20:5,pt=partner(),before=stageOf(curXp());save.xpBy[pt.id]=curXp()+gain;const after=stageOf(curXp());save.programs[cur]=expandBlocks(program).map(x=>x.type);persist();
  $("clearStats").textContent=m.title+"｜つかった めいれい "+expandBlocks(program).length+"こ｜+"+gain+" XP ゲット！";
  const evo=$("evoAnnounce");
- if(after>before){evo.classList.remove("hidden");evo.innerHTML="✨ しんか！ パートナーが「"+pt.names[after-1]+"」に そだったよ！<br><img src=\""+partnerImg(pt.id,after)+"\" alt=\""+pt.names[after-1]+"\" style=\"width:76px;height:76px;object-fit:contain\">"}
- else evo.classList.add("hidden");
+ let announce="";
+ if(after>before)announce="✨ しんか！ パートナーが「"+pt.names[after-1]+"」に そだったよ！<br><img src=\""+partnerImg(pt.id,after)+"\" alt=\""+pt.names[after-1]+"\" style=\"width:76px;height:76px;object-fit:contain\">";
+ if(newlyUnlocked.length)announce+=(announce?"<br>":"")+"🎉 あたらしい パートナーが えらべるように なったよ：「"+newlyUnlocked.map(x=>x.names[0]).join("」「")+"」";
+ if(announce){evo.classList.remove("hidden");evo.innerHTML=announce}else evo.classList.add("hidden");
  buildChips();$("reflNote").value=(save.reflections[m.id]&&save.reflections[m.id].note)||"";
  setMsg("やったね！てきを ぜんぶ たおした！");
  setTimeout(()=>$("clearModal").classList.remove("hidden"),500);

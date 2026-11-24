@@ -149,7 +149,8 @@ main{max-width:1180px;margin:0 auto;padding:12px 14px}
 #robot.bump #robotBody{animation:bump .45s ease-in-out}
 @keyframes bump{0%,100%{transform:rotate(0)}25%{transform:translate(-4px,-2px) rotate(-7deg)}55%{transform:translate(4px,2px) rotate(6deg)}80%{transform:translate(-2px,0) rotate(-3deg)}}
 .navi{display:flex;gap:10px;padding:10px 12px;border-top:2px solid #EFF6FF;align-items:flex-start}
-.navi-face{width:46px;height:46px;border-radius:14px;background:#ECFDF5;border:2px solid #A7F3D0;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.navi-face{width:56px;height:56px;border-radius:14px;background:#ECFDF5;border:2px solid #A7F3D0;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.navi-face img{width:100%;height:100%;object-fit:cover;object-position:50% 6%;display:block}
 .navi-bubble{flex:1;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:16px;padding:8px 10px;min-height:52px}
 .navi-bubble.warn{background:#FFF7ED;border-color:#FED7AA}
 .navi-bubble.hintbg{background:#FFFBEB;border-color:#FDE68A}
@@ -495,7 +496,8 @@ const BLOCKS=[
 {type:"repeat",label:"くりかえし",desc:"なかの めいれいを なんかいも くりかえす",icon:"🔁",cls:"b-repeat"},
 {type:"ifwall",label:"もし まえが かべ なら",desc:"まえが いわ・そとなら、なかを うごかす",icon:"？",cls:"b-if"}];
 const META={}; BLOCKS.forEach(b=>META[b.type]=b);
-const GUIDES=[{name:"そら",color:"#38BDF8"},{name:"りく",color:"#4ADE80"},{name:"かい",color:"#A78BFA"},{name:"さく",color:"#F9A8D4"},{name:"つき",color:"#FCD34D"},{name:"なみ",color:"#60A5FA"}];
+const GUIDES=[{id:"sora",name:"そら",color:"#38BDF8"},{id:"riku",name:"りく",color:"#4ADE80"},{id:"kai",name:"かい",color:"#A78BFA"},{id:"saku",name:"さく",color:"#F9A8D4"},{id:"tsuki",name:"つき",color:"#FCD34D"},{id:"nami",name:"なみ",color:"#60A5FA"}];
+const CHAR_BASE="https://tt-sensei.github.io/navi-character-/assets/web/characters/";
 /* ===== パートナー（ナビアン）育成：カタログの実在3体から選択・3段階進化 =====
    画像は NAVI CHARACTER カタログ（displayNamesJa）の正式名と実在パスを使用。
    パス形式: assets/web/fantasy/monsters/{zako|zako-evolved|zako-lastevo}/{id}.webp（公開版で全9点 200確認済み） */
@@ -596,7 +598,7 @@ function buildPalette(){
   btn.addEventListener("click",()=>addBlock(b.type));p.appendChild(btn)});
  const note=document.createElement("p");note.className="pal-note";note.textContent=freeMode?"すべての ブロックが つかえるよ。「くりかえし」「もし」を えらんでから ブロックを おすと、なかに 入るよ。":(cur>=46?"「くりかえし」「もし」を えらんでから ブロックを おすと、なかに 入るよ。":(cur>=36?"「くりかえし」を えらんでから ブロックを おすと、なかに 入るよ。ならびかえは ↑↓、けすときは ×。":"プログラムは 上から じゅんばんに うごくよ。ならびかえは ↑↓、けすときは × を つかってね。"));p.appendChild(note);
 }
-function setGuideFace(){$("guideFace").innerHTML='<svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="17" fill="'+guide.color+'"/><circle cx="14" cy="18" r="2.4" fill="#0F172A"/><circle cx="26" cy="18" r="2.4" fill="#0F172A"/><path d="M14 25 Q20 29 26 25" stroke="#0F172A" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>'}
+function setGuideFace(expr){const box=$("guideFace");box.innerHTML="";const img=document.createElement("img");img.alt=guide.name;img.src=CHAR_BASE+guide.id+"/expressions/"+(expr||"01-normal-smile")+".webp";img.onerror=()=>{box.innerHTML='<svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="17" fill="'+guide.color+'"/><circle cx="14" cy="18" r="2.4" fill="#0F172A"/><circle cx="26" cy="18" r="2.4" fill="#0F172A"/><path d="M14 25 Q20 29 26 25" stroke="#0F172A" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>'};box.appendChild(img)}
 function openMission(id){
  cur=id;program=(mission().preset||[]).map(t=>({id:nid(),type:t}));selId=null;hintIdx=0;buildPalette();guide=GUIDES[Math.floor(Math.random()*GUIDES.length)];
  $("guideName").textContent="ガイド："+guide.name;
@@ -715,7 +717,7 @@ function runOrPause(){
  if(exec.status==="paused"){exec.status="running";updateRunBtn();schedule();return}
  if(!program.length){Snd.bump();setMsg("まだ めいれいが ないよ。ブロックを タップしてね。","warn");return}
  const keep=program.slice();resetStage();program=keep;
- exec.frames=[{list:program,i:0,left:1}];exec.status="running";updateRunBtn();
+ exec.frames=[{list:program,i:0,left:1}];exec.status="running";updateRunBtn();setGuideFace("10-confident");
  setMsg("しゅっぱつ！うごきを よく 見てみよう。");schedule(200);
 }
 function schedule(ms){stopTimer();exec.timer=setTimeout(step,ms||(fast?280:580))}
@@ -732,7 +734,7 @@ function spawnFx(x,y){const m=mission(),o=$("objects");const d=document.createEl
 function step(){
  if(exec.status!=="running")return;
  const s=nextLeaf();
- if(!s){exec.status="idle";exec.activeId=null;updateRunBtn();renderProgram();Snd.bump();const mm=mission(),el=missionEnemies(mm).length-defeated.length,sl=mm.stars.length-collected.length;
+ if(!s){exec.status="idle";exec.activeId=null;updateRunBtn();renderProgram();Snd.bump();setGuideFace("07-encouraging");const mm=mission(),el=missionEnemies(mm).length-defeated.length,sl=mm.stars.length-collected.length;
   setMsg(el>0?("プログラム おわり。てきが あと "+el+"体 のこっているよ。みちや じゅんばんを 見なおそう。"):(sl>0?("プログラム おわり。スターが あと "+sl+"こ あるよ。"):"さいごまで うごいたよ。もう少しで たおせそう！"),"hint");return}
  exec.activeId=s.id;renderProgram();
  const m=mission(),DX=[0,1,0,-1],DY=[-1,0,1,0];
@@ -750,9 +752,9 @@ function step(){
  else if(s.type==="left"){Snd.turn();robot.dir=(robot.dir+3)%4;robot.angle-=90;updateRobot()}
  schedule();
 }
-function collide(msg){stopTimer();exec.status="idle";updateRunBtn();Snd.bump();const r=$("robot");r.classList.remove("bump");void r.offsetWidth;r.classList.add("bump");setMsg(msg,"warn");renderProgram()}
+function collide(msg){stopTimer();exec.status="idle";updateRunBtn();Snd.bump();setGuideFace("06-troubled");const r=$("robot");r.classList.remove("bump");void r.offsetWidth;r.classList.add("bump");setMsg(msg,"warn");renderProgram()}
 function onClear(){
- stopTimer();exec.status="idle";exec.activeId=null;updateRunBtn();renderProgram();Snd.clear();
+ stopTimer();exec.status="idle";exec.activeId=null;updateRunBtn();renderProgram();Snd.clear();setGuideFace("08-celebrating");
  if(freeMode){freeClear();return}
  const m=mission(),first=!save.cleared.includes(m.id);
  const clearedBefore=save.cleared.length;
@@ -877,7 +879,7 @@ $("btnSpeed").addEventListener("click",()=>{Snd.tap();fast=!fast;$("btnSpeed").t
 $("btnClear").addEventListener("click",()=>{if(!program.length||guardEdit())return;$("clearBar").classList.remove("hidden")});
 $("clearNo").addEventListener("click",()=>$("clearBar").classList.add("hidden"));
 $("clearYes").addEventListener("click",()=>{if(guardEdit()){$("clearBar").classList.add("hidden");return}Snd.del();const m=mission();program=m.preset?m.preset.map(t=>({id:nid(),type:t})):[];$("clearBar").classList.add("hidden");renderProgram()});
-$("btnHint").addEventListener("click",()=>{Snd.tap();const m=mission();setMsg("💡 ヒント："+m.hints[hintIdx%m.hints.length],"hint");hintIdx++;$("hintNo").textContent=((hintIdx%m.hints.length)+1)+"/"+m.hints.length});
+$("btnHint").addEventListener("click",()=>{Snd.tap();setGuideFace("04-idea");const m=mission();setMsg("💡 ヒント："+m.hints[hintIdx%m.hints.length],"hint");hintIdx++;$("hintNo").textContent=((hintIdx%m.hints.length)+1)+"/"+m.hints.length});
 $("btnRetry").addEventListener("click",()=>{Snd.tap();if(freeMode)saveFreeReflection();else saveReflection();$("clearModal").classList.add("hidden");const keep=program.slice();resetStage();program=keep;renderProgram()});
 $("btnNext").addEventListener("click",()=>{Snd.tap();if(freeMode){saveFreeReflection();$("clearModal").classList.add("hidden");if(currentWork)currentWork.program=program;openEditor();return}saveReflection();$("clearModal").classList.add("hidden");if(cur<MISSIONS.length)openMission(cur+1);else goTop()});
 window.addEventListener("resize",()=>{if(!$("screenPlay").classList.contains("hidden"))renderField()});

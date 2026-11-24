@@ -647,13 +647,12 @@ function renderField(){
  const cells=$("cells");cells.style.gridTemplateColumns="repeat("+n+",1fr)";cells.style.gridTemplateRows="repeat("+n+",1fr)";cells.innerHTML="";
  for(let y=0;y<n;y++)for(let x=0;x<n;x++){const d=document.createElement("div");d.className="cell"+((x+y)%2?" alt":"");cells.appendChild(d)}
  renderObjects();
- const r=$("robot");r.style.width=(100/n)+"%";r.style.height=(100/n)+"%";r.style.left="8px";r.style.top="8px";
- r.style.width="calc("+(100/n)+"% - 5px)";r.style.height="calc("+(100/n)+"% - 5px)";
+ const r=$("robot");const cw='calc((100% - '+(16+(n-1)*5)+'px) / '+n+')';r.style.left="8px";r.style.top="8px";r.style.width=cw;r.style.height=cw;
  const pt=partner(),pst=stageOf(curXp());
  $("robotBody").innerHTML='<div class="actor-wrap"><div class="dir-arrow-wrap" id="dirArrow"><div class="dir-arrow"></div></div><img class="actor-img" src="'+partnerImg(pt.id,pst)+'" alt="'+pt.names[pst-1]+'"></div>';
 }
 
-function cellPos(x,y,n){return 'left:calc(8px + '+(x*(100/n))+'% );top:calc(8px + '+(y*(100/n))+'% );width:calc('+(100/n)+'% - 5px);height:calc('+(100/n)+'% - 5px)'}
+function cellPos(x,y,n){const g=16+(n-1)*5;const w='((100% - '+g+'px) / '+n+')';return 'left:calc(8px + '+x+' * ('+w+' + 5px));top:calc(8px + '+y+' * ('+w+' + 5px));width:calc('+w+');height:calc('+w+')'}
 function renderObjects(){
  const m=mission(),n=m.size,o=$("objects");o.innerHTML="";o.style.position="absolute";o.style.inset="0";
  const add=(x,y,cls,txt)=>{const d=document.createElement("div");d.className="obj";d.setAttribute("style",cellPos(x,y,n));d.innerHTML='<div class="inner '+cls+'">'+txt+"</div>";o.appendChild(d)};
@@ -665,7 +664,7 @@ function renderObjects(){
  if(m.stars.length){$("starBadge").classList.remove("hidden");$("starNow").textContent=collected.length;$("starAll").textContent=m.stars.length}else{$("starBadge").classList.add("hidden")}
 }
 const DIR_TXT=["↑ きた","→ ひがし","↓ みなみ","← にし"];
-function updateRobot(){$("robot").style.transform="translate("+(robot.x*100)+"%, "+(robot.y*100)+"%)";const da=$("dirArrow");if(da)da.style.transform="rotate("+robot.angle+"deg)";const dn=$("dirNow");if(dn)dn.textContent=DIR_TXT[robot.dir]}
+function updateRobot(){$("robot").style.transform="translate(calc("+(robot.x*100)+"% + "+(robot.x*5)+"px), calc("+(robot.y*100)+"% + "+(robot.y*5)+"px))";const da=$("dirArrow");if(da)da.style.transform="rotate("+robot.angle+"deg)";const dn=$("dirNow");if(dn)dn.textContent=DIR_TXT[robot.dir]}
 /* ===== プログラム編集（タップのみ） ===== */
 function findLoc(blocks,id){for(let i=0;i<blocks.length;i++){const b=blocks[i];if(b.id===id)return{list:blocks,index:i,block:b};if(b.children){const r=findLoc(b.children,id);if(r)return r}}return null}
 function expandBlocks(blocks,out){out=out||[];blocks.forEach(b=>{if(b.type==="repeat"){for(let i=0;i<(b.count||2);i++)expandBlocks(b.children,out)}else if(b.type==="ifwall"){expandBlocks(b.children,out)}else out.push({id:b.id,type:b.type})});return out}

@@ -213,6 +213,23 @@ main{max-width:1180px;margin:0 auto;padding:12px 14px}
 .btn-retry{background:#F1F5F9;color:#334155}
 .note-input{width:100%;border:2px solid #E2E8F0;border-radius:12px;padding:9px;font-size:13px;font-weight:700;font-family:inherit}
 @media (max-width:900px){.top-grid{grid-template-columns:1fr}.play-grid{grid-template-columns:1fr;height:auto}.mgrid{grid-template-columns:repeat(2,1fr)}}
+/* 見た目パッチ（文字・色・ミニマップ・足あと・演出） */
+main{max-width:1500px}
+.pal-note,.pbtn .ds,.mcard .step,.mcard .grade,.step-badge{font-size:12px}
+.start-inner{font-size:11px}
+.enemy-name{font-size:11px}
+#objects .enemy-name{display:none}
+.b-back{background:#4D7C0F}
+.mm{display:grid;gap:1px;width:60px;height:60px;padding:2px;background:#fff;border:1.5px solid #CBD5E1;border-radius:8px;align-self:center;flex-shrink:0}
+.mm i{border-radius:2px;background:#F1F5F9}
+.mgrid{max-height:none;overflow:visible}
+#trail{position:absolute;inset:0;pointer-events:none}
+.foot{position:absolute;display:flex;align-items:center;justify-content:center}
+.foot i{font-style:normal;font-size:18px;line-height:1;color:rgba(37,99,235,.55);text-shadow:0 0 2px #fff}
+.confetti{position:fixed;top:-20px;z-index:60;pointer-events:none;font-size:22px;animation:cfall 2s ease-in forwards}
+@keyframes cfall{to{transform:translateY(105vh) rotate(540deg)}}
+@media (prefers-reduced-motion:reduce){.confetti{display:none}}
+.rock-inner{font-size:0;background:radial-gradient(circle at 35% 30%,#CBD5E1,#64748B);border:2px solid #475569;border-radius:38% 45% 40% 50%;box-shadow:inset -3px -4px 0 rgba(0,0,0,.18)}
 </style>
 </head>
 <body>
@@ -251,7 +268,7 @@ main{max-width:1180px;margin:0 auto;padding:12px 14px}
     </section>
     <section class="card missions">
       <h2>ミッションを えらぼう</h2>
-      <p class="lead">番号の じゅんに すすむのが おすすめ（⭐マーク）。どの ミッションからでも ちょうせんできるよ。学年は めやすだよ。</p>
+      <p class="lead">番号の じゅんに すすむのが おすすめ（⭐マーク）。どの ミッションからでも ちょうせんできるよ。学年は めやすだよ。カードの 小さな 地図は、あおが スタート・あかが てき・きいろが スター・はいいろが いわだよ。</p>
       <div class="mfilters" id="missionFilters"></div>
       <div class="mgrid" id="missionGrid"></div>
     </section>
@@ -274,6 +291,7 @@ main{max-width:1180px;margin:0 auto;padding:12px 14px}
       <div class="field-wrap">
         <div class="gridbox" id="gridBox">
           <div class="cells" id="cells"></div>
+        <div id="trail"></div>
           <div id="objects"></div>
           <div id="robot"><div id="robotBody"></div></div>
         </div>
@@ -557,6 +575,17 @@ function enemyImgUrl(id){return "https://tt-sensei.github.io/navi-character-/ass
 function setMsg(t,mood){$("naviMsg").textContent=t;const b=$("naviBubble");b.className="navi-bubble"+(mood==="warn"?" warn":mood==="hint"?" hintbg":"")}
 /* ===== トップ画面 ===== */
 function esc(t){return String(t==null?"":t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function miniMap(m){
+ const n=m.size,en=missionEnemies(m);
+ let h='<span class="mm" style="grid-template-columns:repeat('+n+',1fr);grid-template-rows:repeat('+n+',1fr)">';
+ for(let y=0;y<n;y++)for(let x=0;x<n;x++){
+  let c="";
+  if(m.start.x===x&&m.start.y===y)c="background:#3B82F6";
+  else if(m.rocks.some(r=>r.x===x&&r.y===y))c="background:#94A3B8";
+  else if(en.some(e=>e.x===x&&e.y===y))c="background:#F43F5E;border-radius:50%";
+  else if(m.stars.some(s=>s.x===x&&s.y===y))c="background:#FBBF24;border-radius:50%";
+  h+='<i style="'+c+'"></i>'}
+ return h+"</span>"}
 function renderTop(){
  const pt=partner(),xp=curXp(),st=stageOf(xp);
  $("partnerArt").innerHTML='<img class="partner-img" src="'+partnerImg(pt.id,st)+'" alt="'+pt.names[st-1]+'">';
@@ -580,7 +609,7 @@ function renderTop(){
   pc.appendChild(b)});
  const mf=$("missionFilters");mf.innerHTML="";
  const stepNums=[...new Set(MISSIONS.map(m=>{const mm=m.step.match(/STEP (\d+)/);return mm?+mm[1]:0}))].filter(n=>n>0).sort((a,b)=>a-b);
- [{k:"all",lb:"すべて ("+MISSIONS.length+")"}].concat(stepNums.map(n=>({k:"s"+n,lb:"STEP "+n+" ("+MISSIONS.filter(m=>m.step.indexOf("STEP "+n+"：")===0).length+")"}))).forEach(f=>{
+ [{k:"all",lb:"すべて ("+save.cleared.length+"/"+MISSIONS.length+")"}].concat(stepNums.map(n=>({k:"s"+n,lb:"STEP "+n+" ("+MISSIONS.filter(m=>m.step.indexOf("STEP "+n+"：")===0&&save.cleared.includes(m.id)).length+"/"+MISSIONS.filter(m=>m.step.indexOf("STEP "+n+"：")===0).length+")"}))).forEach(f=>{
   const b=document.createElement("button");b.type="button";b.className="ed-chip"+(missionFilter===f.k?" on":"");b.textContent=f.lb;
   b.addEventListener("click",()=>{Snd.tap();missionFilter=f.k;renderTop()});mf.appendChild(b)});
  const g=$("missionGrid");g.innerHTML="";
@@ -588,6 +617,7 @@ function renderTop(){
  MISSIONS.filter(m=>missionFilter==="all"||m.step.indexOf("STEP "+missionFilter.slice(1)+"：")===0).forEach(m=>{const done=save.cleared.includes(m.id),reco=m.id===nextReco;
   const b=document.createElement("button");b.type="button";b.className="mcard"+(done?" cleared":"")+(reco?" reco":"");
   b.innerHTML='<span class="num">ミッション '+m.id+(reco?'<span class="reco-tag">⭐ おすすめ</span>':"")+"</span><span class='ttl'>"+m.title+'</span><span class="step">'+m.step+'</span><span class="grade">'+gradeOf(m.id)+(m.subject?'｜教科：'+m.subject:'')+'</span><span class="stat '+(done?"":"yet")+'">'+(done?"★ クリアずみ":"まだ ちょうせん していない")+"</span>";
+  b.querySelector(".num").insertAdjacentHTML("afterend",miniMap(m));
   b.addEventListener("click",()=>{Snd.tap();openMission(m.id)});g.appendChild(b)});
 }
 /* ===== プログラム画面 ===== */
@@ -635,13 +665,19 @@ function renderRecords(){
   list.appendChild(card)});
 }
 function resetStage(){
+ $("trail").innerHTML="";
  stopTimer();exec={status:"idle",frames:[],timer:null,activeId:null};
  const m=mission();robot={x:m.start.x,y:m.start.y,dir:m.start.dir,angle:m.start.dir*90};collected=[];defeated=[];
  renderField();updateRobot();updateRunBtn();setMsg("ブロックを タップして めいれいを つくろう！");
 }
+function boardSide(){
+ const byH=window.innerHeight-330;
+ const byW=innerWidth<=900?innerWidth-60:Math.floor((Math.min(innerWidth,1500)-52)*0.44)-36;
+ return Math.max(280,Math.min(600,byH,byW));
+}
 function renderField(){
  const m=mission(),n=m.size,box=$("gridBox");
- const avail=Math.min(window.innerHeight-330,430);const side=Math.max(280,Math.min(430,avail));
+ const side=boardSide();
  box.style.width=side+"px";box.style.height=side+"px";
  box.style.backgroundImage="url(https://tt-sensei.github.io/navi-character-/assets/web/fantasy/backgrounds/"+bgFor(m)+".webp)";
  const cells=$("cells");cells.style.gridTemplateColumns="repeat("+n+",1fr)";cells.style.gridTemplateRows="repeat("+n+",1fr)";cells.innerHTML="";
@@ -650,9 +686,18 @@ function renderField(){
  const r=$("robot");const cw='calc((100% - '+(16+(n-1)*5)+'px) / '+n+')';r.style.left="8px";r.style.top="8px";r.style.width=cw;r.style.height=cw;
  const pt=partner(),pst=stageOf(curXp());
  $("robotBody").innerHTML='<div class="actor-wrap"><div class="dir-arrow-wrap" id="dirArrow"><div class="dir-arrow"></div></div><img class="actor-img" src="'+partnerImg(pt.id,pst)+'" alt="'+pt.names[pst-1]+'"></div>';
+ updateRobot();
 }
 
 function cellPos(x,y,n){const g=16+(n-1)*5;const w='((100% - '+g+'px) / '+n+')';return 'left:calc(8px + '+x+' * ('+w+' + 5px));top:calc(8px + '+y+' * ('+w+' + 5px));width:calc('+w+');height:calc('+w+')'}
+function addTrail(x,y,d){
+ const e=document.createElement("div");
+ e.className="foot";e.setAttribute("style",cellPos(x,y,mission().size));
+ e.innerHTML='<i style="transform:rotate('+d*90+'deg)">▲</i>';
+ $("trail").appendChild(e)}
+function confetti(){
+ const em=["🎉","⭐","✨","🎊"];
+ for(let i=0;i<26;i++){const e=document.createElement("span");e.className="confetti";e.textContent=em[i%4];e.style.left=Math.random()*100+"vw";e.style.animationDelay=Math.random()*.6+"s";document.body.appendChild(e);setTimeout(()=>e.remove(),2800)}}
 function renderObjects(){
  const m=mission(),n=m.size,o=$("objects");o.innerHTML="";o.style.position="absolute";o.style.inset="0";
  const add=(x,y,cls,txt)=>{const d=document.createElement("div");d.className="obj";d.setAttribute("style",cellPos(x,y,n));d.innerHTML='<div class="inner '+cls+'">'+txt+"</div>";o.appendChild(d)};
@@ -741,6 +786,7 @@ function step(){
   const nx=robot.x+DX[robot.dir]*sign,ny=robot.y+DY[robot.dir]*sign;
   if(nx<0||nx>=m.size||ny<0||ny>=m.size){collide("おっと！そとには すすめないよ。むきや かいすうを 見なおしてみよう。");return}
   if(m.rocks.some(r=>r.x===nx&&r.y===ny)){collide("おっと！いわに ぶつかったよ。どの めいれいで ぶつかったか かくにんしてみよう。");return}
+  addTrail(robot.x,robot.y,s.type==="forward"?robot.dir:(robot.dir+2)%4);
   Snd.step();robot.x=nx;robot.y=ny;updateRobot();const rb=$("robotBody");rb.classList.remove("hop");void rb.offsetWidth;rb.classList.add("hop");
   const k=nx+","+ny;
   if(m.stars.some(st=>st.x===nx&&st.y===ny)&&!collected.includes(k)){collected.push(k);Snd.star();renderObjects();setMsg("キラッ！スターを ゲット！")}
@@ -753,7 +799,7 @@ function step(){
 }
 function collide(msg){stopTimer();exec.status="idle";updateRunBtn();Snd.bump();setGuideFace("06-troubled");const r=$("robot");r.classList.remove("bump");void r.offsetWidth;r.classList.add("bump");setMsg(msg,"warn");renderProgram()}
 function onClear(){
- stopTimer();exec.status="idle";exec.activeId=null;updateRunBtn();renderProgram();Snd.clear();setGuideFace("08-celebrating");
+ stopTimer();exec.status="idle";exec.activeId=null;updateRunBtn();renderProgram();Snd.clear();confetti();setGuideFace("08-celebrating");
  if(freeMode){freeClear();return}
  const m=mission(),first=!save.cleared.includes(m.id);
  const clearedBefore=save.cleared.length;
